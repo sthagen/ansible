@@ -142,6 +142,8 @@ html_context = {
     'github_repo': 'ansible',
     'github_version': 'devel/docs/docsite/rst/',
     'github_module_version': 'devel/lib/ansible/modules/',
+    'github_root_dir': 'devel/lib/ansible',
+    'github_cli_version': 'devel/lib/ansible/cli/',
     'current_version': version,
     'latest_version': '2.9',
     # list specifically out of order to make latest work
@@ -274,4 +276,4 @@ autoclass_content = 'both'
 # location for the mappning to live) will confuse it.
 intersphinx_mapping = {'python': ('https://docs.python.org/2/', (None, '../python2.inv')),
                        'python3': ('https://docs.python.org/3/', (None, '../python3.inv')),
-                       'jinja': ('http://jinja.palletsprojects.com/', (None, '../jinja.inv'))}
+                       'jinja2': ('http://jinja.palletsprojects.com/', (None, '../jinja2.inv'))}
