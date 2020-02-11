@@ -96,6 +96,8 @@ The following modules will be removed in Ansible 2.14. Please update your playbo
 Noteworthy module changes
 -------------------------
 
+* The ``datacenter`` option has been removed from :ref:`vmware_guest_find <vmware_guest_find_module>`
+* The options ``ip_address`` and ``subnet_mask`` have been removed from :ref:`vmware_vmkernel <vmware_vmkernel_module>`; use the suboptions ``ip_address`` and ``subnet_mask`` of the ``network`` option instead.
 * Ansible modules created with ``add_file_common_args=True`` added a number of undocumented arguments which were mostly there to ease implementing certain action plugins. The undocumented arguments ``src``, ``follow``, ``force``, ``content``, ``backup``, ``remote_src``, ``regexp``, ``delimiter``, and ``directory_mode`` are now no longer added. Modules relying on these options to be added need to specify them by themselves.
 * :ref:`vmware_datastore_maintenancemode <vmware_datastore_maintenancemode_module>` now returns ``datastore_status`` instead of Ansible internal key ``results``.
 * :ref:`vmware_host_kernel_manager <vmware_host_kernel_manager_module>` now returns ``host_kernel_status`` instead of Ansible internal key ``results``.
@@ -115,6 +117,8 @@ Noteworthy module changes
 * :ref:`docker_container <docker_container_module>` no longer passes information on non-anonymous volumes or binds as ``Volumes`` to the Docker daemon. This increases compatibility with the ``docker`` CLI program. Note that if you specify ``volumes: strict`` in ``comparisons``, this could cause existing containers created with docker_container from Ansible 2.9 or earlier to restart.
 * :ref:`docker_container <docker_container_module>`'s support for port ranges was adjusted to be more compatible to the ``docker`` command line utility: a one-port container range combined with a multiple-port host range will no longer result in only the first host port be used, but the whole range being passed to Docker so that a free port in that range will be used.
 * :ref:`purefb_fs <purefb_fs_module>` no longer supports the deprecated ``nfs`` option. This has been superceeded by ``nfsv3``.
+* :ref:`nxos_igmp_interface <nxos_igmp_interface_module>` no longer supports the deprecated ``oif_prefix`` and ``oif_source`` options. These have been superceeded by ``oif_ps``.
+
 
 Plugins
 =======
