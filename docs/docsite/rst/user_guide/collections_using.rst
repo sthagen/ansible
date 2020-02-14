@@ -47,6 +47,54 @@ Configuring the ``ansible-galaxy`` client
 
 .. _using_collections:
 
+Verifying collections
+=====================
+
+Verifying collections with ``ansible-galaxy``
+---------------------------------------------
+
+Once installed, you can verify that the content of the installed collection matches the content of the collection on the server. This feature expects that the collection is installed in one of the configured collection paths and that the collection exists on one of the configured galaxy servers.
+
+.. code-block:: bash
+
+   ansible-galaxy collection verify my_namespace.my_collection
+
+The output of the ``ansible-galaxy collection verify`` command is quiet if it is successful. If a collection has been modified, the altered files are listed under the collection name.
+
+.. code-block:: bash
+
+    ansible-galaxy collection verify my_namespace.my_collection
+    Collection my_namespace.my_collection contains modified content in the following files:
+    my_namespace.my_collection
+        plugins/inventory/my_inventory.py
+        plugins/modules/my_module.py
+
+You can use the ``-vvv`` flag to display additional information, such as the version and path of the installed collection, the URL of the remote collection used for validation, and successful verification output.
+
+.. code-block:: bash
+
+   ansible-galaxy collection verify my_namespace.my_collection -vvv
+   ...
+   Verifying 'my_namespace.my_collection:1.0.0'.
+   Installed collection found at '/path/to/ansible_collections/my_namespace/my_collection/'
+   Remote collection found at 'https://galaxy.ansible.com/download/my_namespace-my_collection-1.0.0.tar.gz'
+   Successfully verified that checksums for 'my_namespace.my_collection:1.0.0' match the remote collection
+
+If you have a pre-release or non-latest version of a collection installed you should include the specific version to verify. If the version is omitted, the installed collection is verified against the latest version available on the server.
+
+.. code-block:: bash
+
+   ansible-galaxy collection verify my_namespace.my_collection:1.0.0
+
+In addition to the ``namespace.collection_name:version`` format, you can provide the collections to verify in a ``requirements.yml`` file. Dependencies listed in ``requirements.yml`` are not included in the verify process and should be verified separately.
+
+.. code-block:: bash
+
+   ansible-galaxy collection verify -r requirements.yml
+
+Verifying against ``tar.gz`` files is not supported. If your ``requirements.yml`` contains paths to tar files or URLs for installation, you can use the ``--ignore-errors`` flag to ensure that all collections using the ``namespace.name`` format in the file are processed.
+
+
 Using collections in a Playbook
 ===============================
 
@@ -85,11 +133,11 @@ The ``collections`` keyword lets you define a list of collections that your role
 Using ``collections`` in roles
 ------------------------------
 
-Within a role, you can control which collections Ansible searches for the tasks inside the role using the ``collections`` keyword in the role's ``metadata/main.yml``. Ansible will use the collections list defined inside the role even if the playbook that calls the role defines different collections in a separate ``collections`` keyword entry. Roles defined inside a collection always implicitly search their own collection first, so you don't need to use the ``collections`` keyword to access modules, actions, or other roles contained in the same collection.
+Within a role, you can control which collections Ansible searches for the tasks inside the role using the ``collections`` keyword in the role's ``meta/main.yml``. Ansible will use the collections list defined inside the role even if the playbook that calls the role defines different collections in a separate ``collections`` keyword entry. Roles defined inside a collection always implicitly search their own collection first, so you don't need to use the ``collections`` keyword to access modules, actions, or other roles contained in the same collection.
 
 .. code-block:: yaml
 
-   # myrole/metadata/main.yml
+   # myrole/meta/main.yml
    collections:
      - my_namespace.first_collection
      - my_namespace.second_collection
