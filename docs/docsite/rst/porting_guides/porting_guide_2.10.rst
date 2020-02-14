@@ -75,6 +75,9 @@ The following functionality will be removed in Ansible 2.14. Please update updat
 * :ref:`clc_aa_policy <clc_aa_policy_module>`: the ``wait`` parameter will be removed. It has always been ignored by the module.
 * :ref:`redfish_config <redfish_config_module>`, :ref:`redfish_command <redfish_command_module>`: the behavior to select the first System, Manager, or Chassis resource to modify when multiple are present will be removed. Use the new ``resource_id`` option to specify target resource to modify.
 * :ref:`win_domain_controller <win_domain_controller_module>`: the ``log_path`` option will be removed. This was undocumented and only related to debugging information for module development.
+* :ref:`win_package <win_package_module>`: the ``username`` and ``password`` options will be removed. The same functionality can be done by using ``become: yes`` and ``become_flags: logon_type=new_credentials logon_flags=netcredentials_only`` on the task.
+* :ref:`win_package <win_package_module>`: the ``ensure`` alias for the ``state`` option will be removed. Please use ``state`` instead of ``ensure``.
+* :ref:`win_package <win_package_module>`: the ``productid`` alias for the ``product_id`` option will be removed. Please use ``product_id`` instead of ``productid``.
 
 
 
@@ -99,6 +102,7 @@ Noteworthy module changes
 * The ``datacenter`` option has been removed from :ref:`vmware_guest_find <vmware_guest_find_module>`
 * The options ``ip_address`` and ``subnet_mask`` have been removed from :ref:`vmware_vmkernel <vmware_vmkernel_module>`; use the suboptions ``ip_address`` and ``subnet_mask`` of the ``network`` option instead.
 * Ansible modules created with ``add_file_common_args=True`` added a number of undocumented arguments which were mostly there to ease implementing certain action plugins. The undocumented arguments ``src``, ``follow``, ``force``, ``content``, ``backup``, ``remote_src``, ``regexp``, ``delimiter``, and ``directory_mode`` are now no longer added. Modules relying on these options to be added need to specify them by themselves.
+* The ``AWSRetry`` decorator no longer catches ``NotFound`` exceptions by default.  ``NotFound`` exceptions need to be explicitly added using ``catch_extra_error_codes``.  Some AWS modules may see an increase in transient failures due to AWS's eventual consistency model.
 * :ref:`vmware_datastore_maintenancemode <vmware_datastore_maintenancemode_module>` now returns ``datastore_status`` instead of Ansible internal key ``results``.
 * :ref:`vmware_host_kernel_manager <vmware_host_kernel_manager_module>` now returns ``host_kernel_status`` instead of Ansible internal key ``results``.
 * :ref:`vmware_host_ntp <vmware_host_ntp_module>` now returns ``host_ntp_status`` instead of Ansible internal key ``results``.
