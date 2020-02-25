@@ -37,7 +37,6 @@ def load_fixture(name):
 
     with open(path) as f:
         data = f.read()
-
     try:
         data = json.loads(data)
     except Exception:
@@ -62,7 +61,6 @@ class TestEosModule(ModuleTestCase):
         else:
             result = self.changed(changed)
             self.assertEqual(result['changed'], changed, result)
-
         if commands is not None:
             if transport == 'eapi':
                 cmd = []
