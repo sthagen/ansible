@@ -1839,9 +1839,6 @@ lib/ansible/modules/cloud/memset/memset_zone_record.py validate-modules:paramete
 lib/ansible/modules/cloud/misc/cloud_init_data_facts.py validate-modules:doc-missing-type
 lib/ansible/modules/cloud/misc/helm.py validate-modules:doc-missing-type
 lib/ansible/modules/cloud/misc/helm.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/cloud/misc/ovirt.py validate-modules:doc-choices-do-not-match-spec
-lib/ansible/modules/cloud/misc/ovirt.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/cloud/misc/ovirt.py validate-modules:undocumented-parameter
 lib/ansible/modules/cloud/misc/proxmox.py validate-modules:doc-missing-type
 lib/ansible/modules/cloud/misc/proxmox.py validate-modules:parameter-type-not-in-doc
 lib/ansible/modules/cloud/misc/proxmox_kvm.py validate-modules:doc-default-does-not-match-spec
@@ -8178,9 +8175,6 @@ test/integration/targets/want_json_modules_posix/library/helloworld.py metaclass
 test/integration/targets/win_audit_rule/library/test_get_audit_rule.ps1 pslint:PSCustomUseLiteralPath
 test/integration/targets/win_chocolatey/files/tools/chocolateyUninstall.ps1 pslint:PSCustomUseLiteralPath
 test/integration/targets/win_chocolatey_source/library/choco_source.ps1 pslint:PSCustomUseLiteralPath
-test/integration/targets/win_csharp_utils/library/ansible_basic_tests.ps1 pslint:PSCustomUseLiteralPath
-test/integration/targets/win_csharp_utils/library/ansible_basic_tests.ps1 pslint:PSUseDeclaredVarsMoreThanAssignments # test setup requires vars to be set globally and not referenced in the same scope
-test/integration/targets/win_csharp_utils/library/ansible_become_tests.ps1 pslint:PSCustomUseLiteralPath
 test/integration/targets/win_dsc/files/xTestDsc/1.0.0/DSCResources/ANSIBLE_xSetReboot/ANSIBLE_xSetReboot.psm1 pslint!skip
 test/integration/targets/win_dsc/files/xTestDsc/1.0.0/DSCResources/ANSIBLE_xTestResource/ANSIBLE_xTestResource.psm1 pslint!skip
 test/integration/targets/win_dsc/files/xTestDsc/1.0.0/xTestDsc.psd1 pslint!skip
@@ -8188,11 +8182,8 @@ test/integration/targets/win_dsc/files/xTestDsc/1.0.1/DSCResources/ANSIBLE_xTest
 test/integration/targets/win_dsc/files/xTestDsc/1.0.1/xTestDsc.psd1 pslint!skip
 test/integration/targets/win_exec_wrapper/library/test_fail.ps1 pslint:PSCustomUseLiteralPath
 test/integration/targets/win_iis_webbinding/library/test_get_webbindings.ps1 pslint:PSUseApprovedVerbs
-test/integration/targets/win_module_utils/library/argv_parser_test.ps1 pslint:PSUseApprovedVerbs
-test/integration/targets/win_module_utils/library/backup_file_test.ps1 pslint:PSCustomUseLiteralPath
-test/integration/targets/win_module_utils/library/command_util_test.ps1 pslint:PSCustomUseLiteralPath
-test/integration/targets/win_module_utils/library/legacy_only_new_way_win_line_ending.ps1 line-endings
-test/integration/targets/win_module_utils/library/legacy_only_old_way_win_line_ending.ps1 line-endings
+test/integration/targets/win_module_utils/library/legacy_only_new_way_win_line_ending.ps1 line-endings  # Explicitly tests that we still work with Windows line endings
+test/integration/targets/win_module_utils/library/legacy_only_old_way_win_line_ending.ps1 line-endings  # Explicitly tests that we still work with Windows line endings
 test/integration/targets/win_ping/library/win_ping_syntax_error.ps1 pslint!skip
 test/integration/targets/win_psmodule/files/module/template.psd1 pslint!skip
 test/integration/targets/win_psmodule/files/module/template.psm1 pslint!skip
