@@ -347,6 +347,7 @@ test/integration/targets/wait_for/files/testserver.py metaclass-boilerplate
 test/integration/targets/want_json_modules_posix/library/helloworld.py future-import-boilerplate
 test/integration/targets/want_json_modules_posix/library/helloworld.py metaclass-boilerplate
 test/integration/targets/win_exec_wrapper/library/test_fail.ps1 pslint:PSCustomUseLiteralPath
+test/integration/targets/win_exec_wrapper/tasks/main.yml no-smart-quotes  # We are explicitly testing smart quote support for env vars
 test/integration/targets/win_module_utils/library/legacy_only_new_way_win_line_ending.ps1 line-endings  # Explicitly tests that we still work with Windows line endings
 test/integration/targets/win_module_utils/library/legacy_only_old_way_win_line_ending.ps1 line-endings  # Explicitly tests that we still work with Windows line endings
 test/integration/targets/win_script/files/test_script.ps1 pslint:PSAvoidUsingWriteHost # Keep
@@ -492,7 +493,6 @@ test/units/module_utils/json_utils/test_filter_non_json_lines.py future-import-b
 test/units/module_utils/parsing/test_convert_bool.py future-import-boilerplate
 test/units/module_utils/test_distro.py future-import-boilerplate
 test/units/module_utils/test_distro.py metaclass-boilerplate
-test/units/module_utils/test_text.py future-import-boilerplate
 test/units/module_utils/urls/test_Request.py replace-urlopen
 test/units/module_utils/urls/test_fetch_url.py replace-urlopen
 test/units/modules/conftest.py future-import-boilerplate
