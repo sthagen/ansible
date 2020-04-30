@@ -47,11 +47,13 @@ class GalaxyRole(object):
     SUPPORTED_SCMS = set(['git', 'hg'])
     META_MAIN = (os.path.join('meta', 'main.yml'), os.path.join('meta', 'main.yaml'))
     META_INSTALL = os.path.join('meta', '.galaxy_install_info')
+    META_REQUIREMENTS = (os.path.join('meta', 'requirements.yml'), os.path.join('meta', 'requirements.yaml'))
     ROLE_DIRS = ('defaults', 'files', 'handlers', 'meta', 'tasks', 'templates', 'vars', 'tests')
 
     def __init__(self, galaxy, api, name, src=None, version=None, scm=None, path=None):
 
         self._metadata = None
+        self._requirements = None
         self._install_info = None
         self._validate_certs = not context.CLIARGS['ignore_certs']
 
@@ -327,13 +329,15 @@ class GalaxyRole(object):
                             # bits that might be in the file for security purposes
                             # and drop any containing directory, as mentioned above
                             if member.isreg() or member.issym():
-                                parts = member.name.replace(archive_parent_dir, "", 1).split(os.sep)
-                                final_parts = []
-                                for part in parts:
-                                    if part != '..' and '~' not in part and '$' not in part:
-                                        final_parts.append(part)
-                                member.name = os.path.join(*final_parts)
-                                role_tar_file.extract(member, self.path)
+                                n_member_name = to_native(member.name)
+                                n_archive_parent_dir = to_native(archive_parent_dir)
+                                n_parts = n_member_name.replace(n_archive_parent_dir, "", 1).split(os.sep)
+                                n_final_parts = []
+                                for n_part in n_parts:
+                                    if n_part != '..' and '~' not in n_part and '$' not in n_part:
+                                        n_final_parts.append(n_part)
+                                member.name = os.path.join(*n_final_parts)
+                                role_tar_file.extract(member, to_native(self.path))
 
                         # write out the install info file for later use
                         self._write_galaxy_install_info()
@@ -371,3 +375,25 @@ class GalaxyRole(object):
         }
         """
         return dict(scm=self.scm, src=self.src, version=self.version, name=self.name)
+
+    @property
+    def requirements(self):
+        """
+        Returns role requirements
+        """
+        if self._requirements is None:
+            self._requirements = []
+            for meta_requirements in self.META_REQUIREMENTS:
+                meta_path = os.path.join(self.path, meta_requirements)
+                if os.path.isfile(meta_path):
+                    try:
+                        f = open(meta_path, 'r')
+                        self._requirements = yaml.safe_load(f)
+                    except Exception:
+                        display.vvvvv("Unable to load requirements for %s" % self.name)
+                    finally:
+                        f.close()
+
+                    break
+
+        return self._requirements
