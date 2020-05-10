@@ -568,10 +568,10 @@ class GalaxyCLI(CLI):
                 raise AnsibleError("Expecting only 'roles' and/or 'collections' as base keys in the requirements "
                                    "file. Found: %s" % (to_native(", ".join(extra_keys))))
 
-            for role_req in file_requirements.get('roles', []):
+            for role_req in file_requirements.get('roles') or []:
                 requirements['roles'] += parse_role_req(role_req)
 
-            for collection_req in file_requirements.get('collections', []):
+            for collection_req in file_requirements.get('collections') or []:
                 if isinstance(collection_req, dict):
                     req_name = collection_req.get('name', None)
                     if req_name is None:
@@ -854,7 +854,7 @@ class GalaxyCLI(CLI):
             else:
                 in_templates_dir = rel_root_dir == 'templates'
 
-            dirs[:] = [d for d in dirs if not any(r.match(d) for r in skeleton_ignore_re)]
+            dirs = [d for d in dirs if not any(r.match(d) for r in skeleton_ignore_re)]
 
             for f in files:
                 filename, ext = os.path.splitext(f)

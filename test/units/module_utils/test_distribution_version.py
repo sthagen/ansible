@@ -991,6 +991,40 @@ TESTSETS = [
         }
     },
     {
+        'name': 'Kali 2020.2',
+        'input': {
+            '/etc/os-release': ("PRETTY_NAME=\"Kali GNU/Linux Rolling\"\nNAME=\"Kali GNU/Linux\"\nID=kali\nVERSION=\"2020.2\"\n"
+                                "VERSION_ID=\"2020.2\"\nVERSION_CODENAME=\"kali-rolling\"\nID_LIKE=debian\nANSI_COLOR=\"1;31\"\n"
+                                "HOME_URL=\"https://www.kali.org/\"\nSUPPORT_URL=\"https://forums.kali.org/\"\n"
+                                "BUG_REPORT_URL=\"https://bugs.kali.org/\""),
+            '/usr/lib/os-release': ("PRETTY_NAME=\"Kali GNU/Linux Rolling\"\nNAME=\"Kali GNU/Linux\"\nID=kali\nVERSION=\"2020.2\"\n"
+                                "VERSION_ID=\"2020.2\"\nVERSION_CODENAME=\"kali-rolling\"\nID_LIKE=debian\nANSI_COLOR=\"1;31\"\n"
+                                "HOME_URL=\"https://www.kali.org/\"\nSUPPORT_URL=\"https://forums.kali.org/\"\n"
+                                "BUG_REPORT_URL=\"https://bugs.kali.org/\"")
+        },
+        'platform.dist': [
+            'kali',
+            '2020.2',
+            ''
+        ],
+        'distro': {
+            'codename': 'kali-rolling',
+            'id': 'kali',
+            'name': 'Kali GNU/Linux Rolling',
+            'version': '2020.2',
+            'version_best': '2020.2',
+            'os_release_info': {},
+            'lsb_release_info': {},
+        },
+        'result': {
+            'distribution': 'Kali',
+            'distribution_version': '2020.2',
+            'distribution_release': 'kali-rolling',
+            'distribution_major_version': '2020',
+            'os_family': 'Debian'
+        }
+    },
+    {
         "platform.dist": [
             "neon",
             "16.04",
@@ -1808,6 +1842,35 @@ TESTSETS = [
             "os_release_info": {},
             "lsb_release_info": {},
         },
+    },
+    {
+        "name": "Pop!_OS 20.04",
+        "distro": {
+            "codename": "focal",
+            "id": "pop",
+            "name": "Pop!_OS",
+            "version": "20.04",
+            "version_best": "20.04",
+            'os_release_info': {},
+            'lsb_release_info': {},
+        },
+        "input": {
+            "/etc/os-release": "NAME=\"Pop!_OS\"\nVERSION=\"20.04\"\nID=pop\nID_LIKE=\"ubuntu debian\"\nPRETTY_NAME=\"Pop!_OS 20.04\"\nVERSION_ID=\"20.04\"\nHOME_URL=\"https://system76.com/pop\"\nSUPPORT_URL=\"http://support.system76.com\"\nBUG_REPORT_URL=\"https://github.com/pop-os/pop/issues\"\nPRIVACY_POLICY_URL=\"https://system76.com/privacy\"\nVERSION_CODENAME=focal\nUBUNTU_CODENAME=focal\nLOGO=distributor-logo-pop-os\n",  # noqa
+            "/etc/lsb-release": "DISTRIB_ID=Pop\nDISTRIB_RELEASE=20.04\nDISTRIB_CODENAME=focal\nDISTRIB_DESCRIPTION=\"Pop!_OS 20.04\"\n",
+            "/usr/lib/os-release": "NAME=\"Pop!_OS\"\nVERSION=\"20.04\"\nID=pop\nID_LIKE=\"ubuntu debian\"\nPRETTY_NAME=\"Pop!_OS 20.04\"\nVERSION_ID=\"20.04\"\nHOME_URL=\"https://system76.com/pop\"\nSUPPORT_URL=\"http://support.system76.com\"\nBUG_REPORT_URL=\"https://github.com/pop-os/pop/issues\"\nPRIVACY_POLICY_URL=\"https://system76.com/privacy\"\nVERSION_CODENAME=focal\nUBUNTU_CODENAME=focal\nLOGO=distributor-logo-pop-os\n",  # noqa
+        },
+        "platform.dist": [
+            "pop",
+            "20.04",
+            "focal"
+        ],
+        "result": {
+            "distribution": "Pop!_OS",
+            "distribution_version": "20.04",
+            "distribution_release": "focal",
+            "distribution_major_version": "20",
+            "os_family": "Debian"
+        }
     },
 ]
 
