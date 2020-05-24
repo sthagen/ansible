@@ -25,7 +25,7 @@ class BlacklistEntry:
         """
         self.alternative = alternative
         self.modules_only = modules_only
-        self.names = set(names) if names else None
+        self.names = set(names) if names else set()
         self.ignore_paths = ignore_paths
 
     def applies_to(self, path, name=None):
@@ -125,7 +125,7 @@ class AnsibleBlacklistChecker(BaseChecker):
         'sys.exit': BlacklistEntry('exit_json or fail_json',
                                    ignore_paths=(
                                        '/lib/ansible/module_utils/basic.py',
-                                       '/lib/ansible/modules/utilities/logic/async_wrapper.py',
+                                       '/lib/ansible/modules/async_wrapper.py',
                                        '/lib/ansible/module_utils/common/removed.py',
                                    ),
                                    modules_only=True),

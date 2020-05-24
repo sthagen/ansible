@@ -31,10 +31,16 @@ from ..util_common import (
 
 from ..ansible_util import (
     ansible_environment,
+    get_collection_detail,
+    CollectionDetailError,
 )
 
 from ..config import (
     SanityConfig,
+)
+
+from ..ci import (
+    get_ci_provider,
 )
 
 from ..data import (
@@ -66,8 +72,10 @@ class ValidateModulesTest(SanitySingleVersion):
 
         paths = [target.path for target in targets.include]
 
+        python = find_python(python_version)
+
         cmd = [
-            find_python(python_version),
+            python,
             os.path.join(SANITY_ROOT, 'validate-modules', 'validate-modules'),
             '--format', 'json',
             '--arg-spec',
@@ -75,13 +83,25 @@ class ValidateModulesTest(SanitySingleVersion):
 
         if data_context().content.collection:
             cmd.extend(['--collection', data_context().content.collection.directory])
+
+            try:
+                collection_detail = get_collection_detail(args, python)
+
+                if collection_detail.version:
+                    cmd.extend(['--collection-version', collection_detail.version])
+                else:
+                    display.warning('Skipping validate-modules collection version checks since no collection version was found.')
+            except CollectionDetailError as ex:
+                display.warning('Skipping validate-modules collection version checks since collection detail loading failed: %s' % ex.reason)
         else:
-            if args.base_branch:
+            base_branch = args.base_branch or get_ci_provider().get_base_branch()
+
+            if base_branch:
                 cmd.extend([
-                    '--base-branch', args.base_branch,
+                    '--base-branch', base_branch,
                 ])
             else:
-                display.warning('Cannot perform module comparison against the base branch. Base branch not detected when running locally.')
+                display.warning('Cannot perform module comparison against the base branch because the base branch was not detected.')
 
         try:
             stdout, stderr = run_command(args, cmd, env=env, capture=True)

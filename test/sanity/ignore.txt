@@ -7,6 +7,7 @@ docs/docsite/_themes/sphinx_rtd_theme/__init__.py metaclass-boilerplate
 docs/docsite/rst/conf.py future-import-boilerplate
 docs/docsite/rst/conf.py metaclass-boilerplate
 docs/docsite/rst/dev_guide/testing/sanity/no-smart-quotes.rst no-smart-quotes
+examples/play.yml shebang
 examples/scripts/ConfigureRemotingForAnsible.ps1 pslint:PSCustomUseLiteralPath
 examples/scripts/upgrade_to_ps3.ps1 pslint:PSCustomUseLiteralPath
 examples/scripts/upgrade_to_ps3.ps1 pslint:PSUseApprovedVerbs
@@ -16,18 +17,30 @@ hacking/build-ansible.py shebang # only run by release engineers, Python 3.6+ re
 hacking/build_library/build_ansible/announce.py compile-2.6!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/announce.py compile-2.7!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/announce.py compile-3.5!skip # release process only, 3.6+ required
-hacking/build_library/build_ansible/command_plugins/dump_config.py compile-2.6!skip # docs build only, 2.7+ required
-hacking/build_library/build_ansible/command_plugins/dump_keywords.py compile-2.6!skip # docs build only, 2.7+ required
-hacking/build_library/build_ansible/command_plugins/generate_man.py compile-2.6!skip # docs build only, 2.7+ required
-hacking/build_library/build_ansible/command_plugins/plugin_formatter.py compile-2.6!skip # docs build only, 2.7+ required
+hacking/build_library/build_ansible/commands.py compile-2.6!skip # release and docs process only, 3.6+ required
+hacking/build_library/build_ansible/commands.py compile-2.7!skip # release and docs process only, 3.6+ required
+hacking/build_library/build_ansible/commands.py compile-3.5!skip # release and docs process only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_config.py compile-2.6!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_config.py compile-2.7!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_config.py compile-3.5!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_keywords.py compile-2.6!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_keywords.py compile-2.7!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/dump_keywords.py compile-3.5!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/generate_man.py compile-2.6!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/generate_man.py compile-2.7!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/generate_man.py compile-3.5!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/plugin_formatter.py compile-2.6!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/plugin_formatter.py compile-2.7!skip # docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/plugin_formatter.py compile-3.5!skip # docs build only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/porting_guide.py compile-2.6!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/porting_guide.py compile-2.7!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/porting_guide.py compile-3.5!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/release_announcement.py compile-2.6!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/release_announcement.py compile-2.7!skip # release process only, 3.6+ required
 hacking/build_library/build_ansible/command_plugins/release_announcement.py compile-3.5!skip # release process only, 3.6+ required
-hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compile-2.6!skip # release process and docs build only, 3.5+ required
-hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compile-2.7!skip # release process and docs build only, 3.5+ required
+hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compile-2.6!skip # release process and docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compile-2.7!skip # release process and docs build only, 3.6+ required
+hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compile-3.5!skip # release process and docs build only, 3.6+ required
 hacking/fix_test_syntax.py future-import-boilerplate
 hacking/fix_test_syntax.py metaclass-boilerplate
 hacking/get_library.py future-import-boilerplate
@@ -43,9 +56,6 @@ hacking/tests/gen_distribution_version_testcase.py metaclass-boilerplate
 lib/ansible/cli/console.py pylint:blacklisted-name
 lib/ansible/cli/scripts/ansible_cli_stub.py shebang
 lib/ansible/cli/scripts/ansible_connection_cli_stub.py shebang
-lib/ansible/compat/selectors/_selectors2.py future-import-boilerplate # ignore bundled
-lib/ansible/compat/selectors/_selectors2.py metaclass-boilerplate # ignore bundled
-lib/ansible/compat/selectors/_selectors2.py pylint:blacklisted-name
 lib/ansible/config/base.yml no-unwanted-files
 lib/ansible/config/module_defaults.yml no-unwanted-files
 lib/ansible/executor/playbook_executor.py pylint:blacklisted-name
@@ -60,6 +70,9 @@ lib/ansible/module_utils/api.py metaclass-boilerplate
 lib/ansible/module_utils/basic.py metaclass-boilerplate
 lib/ansible/module_utils/common/network.py future-import-boilerplate
 lib/ansible/module_utils/common/network.py metaclass-boilerplate
+lib/ansible/module_utils/compat/_selectors2.py future-import-boilerplate # ignore bundled
+lib/ansible/module_utils/compat/_selectors2.py metaclass-boilerplate # ignore bundled
+lib/ansible/module_utils/compat/_selectors2.py pylint:blacklisted-name
 lib/ansible/module_utils/connection.py future-import-boilerplate
 lib/ansible/module_utils/connection.py metaclass-boilerplate
 lib/ansible/module_utils/distro/__init__.py empty-init # breaks namespacing, bundled, do not override
@@ -107,115 +120,115 @@ lib/ansible/module_utils/urls.py pylint:blacklisted-name
 lib/ansible/module_utils/urls.py replace-urlopen
 lib/ansible/module_utils/yumdnf.py future-import-boilerplate
 lib/ansible/module_utils/yumdnf.py metaclass-boilerplate
-lib/ansible/modules/commands/command.py validate-modules:doc-missing-type
-lib/ansible/modules/commands/command.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/commands/command.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/commands/command.py validate-modules:undocumented-parameter
-lib/ansible/modules/commands/expect.py validate-modules:doc-missing-type
-lib/ansible/modules/files/assemble.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/files/blockinfile.py validate-modules:doc-choices-do-not-match-spec
-lib/ansible/modules/files/blockinfile.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/files/copy.py pylint:blacklisted-name
-lib/ansible/modules/files/copy.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/files/copy.py validate-modules:doc-type-does-not-match-spec
-lib/ansible/modules/files/copy.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/files/copy.py validate-modules:undocumented-parameter
-lib/ansible/modules/files/file.py pylint:ansible-bad-function
-lib/ansible/modules/files/file.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/files/file.py validate-modules:undocumented-parameter
-lib/ansible/modules/files/find.py use-argspec-type-path # fix needed
-lib/ansible/modules/files/find.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/files/find.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/files/lineinfile.py validate-modules:doc-choices-do-not-match-spec
-lib/ansible/modules/files/lineinfile.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/files/lineinfile.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/files/replace.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/files/stat.py validate-modules:parameter-invalid
-lib/ansible/modules/files/stat.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/files/stat.py validate-modules:undocumented-parameter
-lib/ansible/modules/files/unarchive.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/files/unarchive.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/net_tools/basics/get_url.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/net_tools/basics/uri.py pylint:blacklisted-name
-lib/ansible/modules/net_tools/basics/uri.py validate-modules:doc-required-mismatch
-lib/ansible/modules/net_tools/basics/uri.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/net_tools/basics/uri.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/language/pip.py pylint:blacklisted-name
-lib/ansible/modules/packaging/language/pip.py validate-modules:doc-elements-mismatch
-lib/ansible/modules/packaging/language/pip.py validate-modules:invalid-ansiblemodule-schema
-lib/ansible/modules/packaging/os/apt.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/packaging/os/apt.py validate-modules:parameter-invalid
-lib/ansible/modules/packaging/os/apt.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/apt.py validate-modules:undocumented-parameter
-lib/ansible/modules/packaging/os/apt_key.py validate-modules:mutually_exclusive-unknown
-lib/ansible/modules/packaging/os/apt_key.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/apt_key.py validate-modules:undocumented-parameter
-lib/ansible/modules/packaging/os/apt_repository.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/packaging/os/apt_repository.py validate-modules:parameter-invalid
-lib/ansible/modules/packaging/os/apt_repository.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/apt_repository.py validate-modules:undocumented-parameter
-lib/ansible/modules/packaging/os/dnf.py validate-modules:doc-missing-type
-lib/ansible/modules/packaging/os/dnf.py validate-modules:doc-required-mismatch
-lib/ansible/modules/packaging/os/dnf.py validate-modules:parameter-invalid
-lib/ansible/modules/packaging/os/dnf.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/packaging/os/dnf.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/dpkg_selections.py validate-modules:doc-missing-type
-lib/ansible/modules/packaging/os/dpkg_selections.py validate-modules:doc-required-mismatch
-lib/ansible/modules/packaging/os/package_facts.py validate-modules:doc-choices-do-not-match-spec
-lib/ansible/modules/packaging/os/package_facts.py validate-modules:doc-missing-type
-lib/ansible/modules/packaging/os/package_facts.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/packaging/os/package_facts.py validate-modules:return-syntax-error
-lib/ansible/modules/packaging/os/rpm_key.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/yum.py pylint:blacklisted-name
-lib/ansible/modules/packaging/os/yum.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/packaging/os/yum.py validate-modules:doc-missing-type
-lib/ansible/modules/packaging/os/yum.py validate-modules:parameter-invalid
-lib/ansible/modules/packaging/os/yum.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/packaging/os/yum.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/yum.py validate-modules:undocumented-parameter
-lib/ansible/modules/packaging/os/yum_repository.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/packaging/os/yum_repository.py validate-modules:doc-missing-type
-lib/ansible/modules/packaging/os/yum_repository.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/packaging/os/yum_repository.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/packaging/os/yum_repository.py validate-modules:undocumented-parameter
-lib/ansible/modules/source_control/git.py pylint:blacklisted-name
-lib/ansible/modules/source_control/git.py use-argspec-type-path
-lib/ansible/modules/source_control/git.py validate-modules:doc-missing-type
-lib/ansible/modules/source_control/git.py validate-modules:doc-required-mismatch
-lib/ansible/modules/source_control/git.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/source_control/git.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/source_control/subversion.py validate-modules:doc-required-mismatch
-lib/ansible/modules/source_control/subversion.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/source_control/subversion.py validate-modules:undocumented-parameter
-lib/ansible/modules/system/getent.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/hostname.py validate-modules:invalid-ansiblemodule-schema
-lib/ansible/modules/system/hostname.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/iptables.py pylint:blacklisted-name
-lib/ansible/modules/system/iptables.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/system/known_hosts.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/system/known_hosts.py validate-modules:doc-missing-type
-lib/ansible/modules/system/known_hosts.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/service.py validate-modules:nonexistent-parameter-documented
-lib/ansible/modules/system/service.py validate-modules:use-run-command-not-popen
-lib/ansible/modules/system/setup.py validate-modules:doc-missing-type
-lib/ansible/modules/system/setup.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/system/setup.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/systemd.py validate-modules:parameter-invalid
-lib/ansible/modules/system/systemd.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/systemd.py validate-modules:return-syntax-error
-lib/ansible/modules/system/sysvinit.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/system/sysvinit.py validate-modules:parameter-type-not-in-doc
-lib/ansible/modules/system/sysvinit.py validate-modules:return-syntax-error
-lib/ansible/modules/system/user.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/system/user.py validate-modules:doc-default-incompatible-type
-lib/ansible/modules/system/user.py validate-modules:parameter-list-no-elements
-lib/ansible/modules/system/user.py validate-modules:use-run-command-not-popen
-lib/ansible/modules/utilities/logic/async_status.py use-argspec-type-path
-lib/ansible/modules/utilities/logic/async_status.py validate-modules!skip
-lib/ansible/modules/utilities/logic/async_wrapper.py ansible-doc!skip  # not an actual module
-lib/ansible/modules/utilities/logic/async_wrapper.py pylint:ansible-bad-function
-lib/ansible/modules/utilities/logic/async_wrapper.py use-argspec-type-path
-lib/ansible/modules/utilities/logic/wait_for.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/command.py validate-modules:doc-missing-type
+lib/ansible/modules/command.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/command.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/command.py validate-modules:undocumented-parameter
+lib/ansible/modules/expect.py validate-modules:doc-missing-type
+lib/ansible/modules/assemble.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/blockinfile.py validate-modules:doc-choices-do-not-match-spec
+lib/ansible/modules/blockinfile.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/copy.py pylint:blacklisted-name
+lib/ansible/modules/copy.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/copy.py validate-modules:doc-type-does-not-match-spec
+lib/ansible/modules/copy.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/copy.py validate-modules:undocumented-parameter
+lib/ansible/modules/file.py pylint:ansible-bad-function
+lib/ansible/modules/file.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/file.py validate-modules:undocumented-parameter
+lib/ansible/modules/find.py use-argspec-type-path # fix needed
+lib/ansible/modules/find.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/find.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/lineinfile.py validate-modules:doc-choices-do-not-match-spec
+lib/ansible/modules/lineinfile.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/lineinfile.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/replace.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/stat.py validate-modules:parameter-invalid
+lib/ansible/modules/stat.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/stat.py validate-modules:undocumented-parameter
+lib/ansible/modules/unarchive.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/unarchive.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/get_url.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/uri.py pylint:blacklisted-name
+lib/ansible/modules/uri.py validate-modules:doc-required-mismatch
+lib/ansible/modules/uri.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/uri.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/pip.py pylint:blacklisted-name
+lib/ansible/modules/pip.py validate-modules:doc-elements-mismatch
+lib/ansible/modules/pip.py validate-modules:invalid-ansiblemodule-schema
+lib/ansible/modules/apt.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/apt.py validate-modules:parameter-invalid
+lib/ansible/modules/apt.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/apt.py validate-modules:undocumented-parameter
+lib/ansible/modules/apt_key.py validate-modules:mutually_exclusive-unknown
+lib/ansible/modules/apt_key.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/apt_key.py validate-modules:undocumented-parameter
+lib/ansible/modules/apt_repository.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/apt_repository.py validate-modules:parameter-invalid
+lib/ansible/modules/apt_repository.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/apt_repository.py validate-modules:undocumented-parameter
+lib/ansible/modules/dnf.py validate-modules:doc-missing-type
+lib/ansible/modules/dnf.py validate-modules:doc-required-mismatch
+lib/ansible/modules/dnf.py validate-modules:parameter-invalid
+lib/ansible/modules/dnf.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/dnf.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/dpkg_selections.py validate-modules:doc-missing-type
+lib/ansible/modules/dpkg_selections.py validate-modules:doc-required-mismatch
+lib/ansible/modules/package_facts.py validate-modules:doc-choices-do-not-match-spec
+lib/ansible/modules/package_facts.py validate-modules:doc-missing-type
+lib/ansible/modules/package_facts.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/package_facts.py validate-modules:return-syntax-error
+lib/ansible/modules/rpm_key.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/yum.py pylint:blacklisted-name
+lib/ansible/modules/yum.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/yum.py validate-modules:doc-missing-type
+lib/ansible/modules/yum.py validate-modules:parameter-invalid
+lib/ansible/modules/yum.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/yum.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/yum.py validate-modules:undocumented-parameter
+lib/ansible/modules/yum_repository.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/yum_repository.py validate-modules:doc-missing-type
+lib/ansible/modules/yum_repository.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/yum_repository.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/yum_repository.py validate-modules:undocumented-parameter
+lib/ansible/modules/git.py pylint:blacklisted-name
+lib/ansible/modules/git.py use-argspec-type-path
+lib/ansible/modules/git.py validate-modules:doc-missing-type
+lib/ansible/modules/git.py validate-modules:doc-required-mismatch
+lib/ansible/modules/git.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/git.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/subversion.py validate-modules:doc-required-mismatch
+lib/ansible/modules/subversion.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/subversion.py validate-modules:undocumented-parameter
+lib/ansible/modules/getent.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/hostname.py validate-modules:invalid-ansiblemodule-schema
+lib/ansible/modules/hostname.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/iptables.py pylint:blacklisted-name
+lib/ansible/modules/iptables.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/known_hosts.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/known_hosts.py validate-modules:doc-missing-type
+lib/ansible/modules/known_hosts.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/service.py validate-modules:nonexistent-parameter-documented
+lib/ansible/modules/service.py validate-modules:use-run-command-not-popen
+lib/ansible/modules/setup.py validate-modules:doc-missing-type
+lib/ansible/modules/setup.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/setup.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/systemd.py validate-modules:parameter-invalid
+lib/ansible/modules/systemd.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/systemd.py validate-modules:return-syntax-error
+lib/ansible/modules/sysvinit.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/sysvinit.py validate-modules:parameter-type-not-in-doc
+lib/ansible/modules/sysvinit.py validate-modules:return-syntax-error
+lib/ansible/modules/user.py validate-modules:doc-default-does-not-match-spec
+lib/ansible/modules/user.py validate-modules:doc-default-incompatible-type
+lib/ansible/modules/user.py validate-modules:parameter-list-no-elements
+lib/ansible/modules/user.py validate-modules:use-run-command-not-popen
+lib/ansible/modules/async_status.py use-argspec-type-path
+lib/ansible/modules/async_status.py validate-modules!skip
+lib/ansible/modules/async_wrapper.py ansible-doc!skip  # not an actual module
+lib/ansible/modules/async_wrapper.py pylint:ansible-bad-function
+lib/ansible/modules/async_wrapper.py use-argspec-type-path
+lib/ansible/modules/wait_for.py validate-modules:parameter-list-no-elements
 lib/ansible/parsing/vault/__init__.py pylint:blacklisted-name
 lib/ansible/playbook/base.py pylint:blacklisted-name
 lib/ansible/playbook/collectionsearch.py required-and-default-attributes  # https://github.com/ansible/ansible/issues/61460
@@ -269,6 +282,8 @@ test/integration/targets/collections_relative_imports/collection_root/ansible_co
 test/integration/targets/expect/files/test_command.py future-import-boilerplate
 test/integration/targets/expect/files/test_command.py metaclass-boilerplate
 test/integration/targets/gathering_facts/library/bogus_facts shebang
+test/integration/targets/gathering_facts/library/facts_one shebang
+test/integration/targets/gathering_facts/library/facts_two shebang
 test/integration/targets/get_url/files/testserver.py future-import-boilerplate
 test/integration/targets/get_url/files/testserver.py metaclass-boilerplate
 test/integration/targets/group/files/gidget.py future-import-boilerplate
@@ -371,8 +386,6 @@ test/support/integration/plugins/module_utils/azure_rm_common_rest.py future-imp
 test/support/integration/plugins/module_utils/azure_rm_common_rest.py metaclass-boilerplate
 test/support/integration/plugins/module_utils/cloud.py future-import-boilerplate
 test/support/integration/plugins/module_utils/cloud.py metaclass-boilerplate
-test/support/integration/plugins/module_utils/common/network.py future-import-boilerplate
-test/support/integration/plugins/module_utils/common/network.py metaclass-boilerplate
 test/support/integration/plugins/module_utils/compat/ipaddress.py future-import-boilerplate
 test/support/integration/plugins/module_utils/compat/ipaddress.py metaclass-boilerplate
 test/support/integration/plugins/module_utils/compat/ipaddress.py no-unicode-literals
@@ -467,6 +480,7 @@ test/units/module_utils/basic/test__symbolic_mode_to_octal.py future-import-boil
 test/units/module_utils/basic/test_deprecate_warn.py future-import-boilerplate
 test/units/module_utils/basic/test_deprecate_warn.py metaclass-boilerplate
 test/units/module_utils/basic/test_deprecate_warn.py pylint:ansible-deprecated-no-version
+test/units/module_utils/basic/test_deprecate_warn.py pylint:ansible-deprecated-version
 test/units/module_utils/basic/test_exit_json.py future-import-boilerplate
 test/units/module_utils/basic/test_get_file_attributes.py future-import-boilerplate
 test/units/module_utils/basic/test_heuristic_log_sanitize.py future-import-boilerplate
@@ -495,25 +509,26 @@ test/units/module_utils/json_utils/test_filter_non_json_lines.py future-import-b
 test/units/module_utils/parsing/test_convert_bool.py future-import-boilerplate
 test/units/module_utils/test_distro.py future-import-boilerplate
 test/units/module_utils/test_distro.py metaclass-boilerplate
+test/units/module_utils/urls/fixtures/multipart.txt line-endings  # Fixture for HTTP tests that use CRLF
 test/units/module_utils/urls/test_Request.py replace-urlopen
 test/units/module_utils/urls/test_fetch_url.py replace-urlopen
 test/units/modules/conftest.py future-import-boilerplate
 test/units/modules/conftest.py metaclass-boilerplate
-test/units/modules/files/test_copy.py future-import-boilerplate
-test/units/modules/packaging/language/test_pip.py future-import-boilerplate
-test/units/modules/packaging/language/test_pip.py metaclass-boilerplate
-test/units/modules/packaging/os/test_apt.py future-import-boilerplate
-test/units/modules/packaging/os/test_apt.py metaclass-boilerplate
-test/units/modules/packaging/os/test_apt.py pylint:blacklisted-name
-test/units/modules/packaging/os/test_yum.py future-import-boilerplate
-test/units/modules/packaging/os/test_yum.py metaclass-boilerplate
-test/units/modules/system/test_iptables.py future-import-boilerplate
-test/units/modules/system/test_iptables.py metaclass-boilerplate
-test/units/modules/system/test_known_hosts.py future-import-boilerplate
-test/units/modules/system/test_known_hosts.py metaclass-boilerplate
-test/units/modules/system/test_known_hosts.py pylint:ansible-bad-function
-test/units/modules/system/test_systemd.py future-import-boilerplate
-test/units/modules/system/test_systemd.py metaclass-boilerplate
+test/units/modules/test_copy.py future-import-boilerplate
+test/units/modules/test_pip.py future-import-boilerplate
+test/units/modules/test_pip.py metaclass-boilerplate
+test/units/modules/test_apt.py future-import-boilerplate
+test/units/modules/test_apt.py metaclass-boilerplate
+test/units/modules/test_apt.py pylint:blacklisted-name
+test/units/modules/test_yum.py future-import-boilerplate
+test/units/modules/test_yum.py metaclass-boilerplate
+test/units/modules/test_iptables.py future-import-boilerplate
+test/units/modules/test_iptables.py metaclass-boilerplate
+test/units/modules/test_known_hosts.py future-import-boilerplate
+test/units/modules/test_known_hosts.py metaclass-boilerplate
+test/units/modules/test_known_hosts.py pylint:ansible-bad-function
+test/units/modules/test_systemd.py future-import-boilerplate
+test/units/modules/test_systemd.py metaclass-boilerplate
 test/units/modules/utils.py future-import-boilerplate
 test/units/modules/utils.py metaclass-boilerplate
 test/units/parsing/utils/test_addresses.py future-import-boilerplate

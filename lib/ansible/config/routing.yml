@@ -1,3 +1,6 @@
+# Copyright (c) 2020 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# This file is only for 2.9 backwards compatiblity, expect it to go away in future ansible versions.
 plugin_routing:
   connection:
     buildah:
@@ -758,115 +761,115 @@ plugin_routing:
     gcp_backend_service:
       redirect: community.general.gcp_backend_service
     gcp_bigquery_dataset_facts:
-      redirect: community.general.gcp_bigquery_dataset_facts
+      redirect: google.cloud.gcp_bigquery_dataset_info
     gcp_bigquery_table_facts:
-      redirect: community.general.gcp_bigquery_table_facts
+      redirect: google.cloud.gcp_bigquery_table_info
     gcp_cloudbuild_trigger_facts:
-      redirect: community.general.gcp_cloudbuild_trigger_facts
+      redirect: google.cloud.gcp_cloudbuild_trigger_info
     gcp_compute_address_facts:
-      redirect: community.general.gcp_compute_address_facts
+      redirect: google.cloud.gcp_compute_address_info
     gcp_compute_backend_bucket_facts:
-      redirect: community.general.gcp_compute_backend_bucket_facts
+      redirect: google.cloud.gcp_compute_backend_bucket_info
     gcp_compute_backend_service_facts:
-      redirect: community.general.gcp_compute_backend_service_facts
+      redirect: google.cloud.gcp_compute_backend_service_info
     gcp_compute_disk_facts:
-      redirect: community.general.gcp_compute_disk_facts
+      redirect: google.cloud.gcp_compute_disk_info
     gcp_compute_firewall_facts:
-      redirect: community.general.gcp_compute_firewall_facts
+      redirect: google.cloud.gcp_compute_firewall_info
     gcp_compute_forwarding_rule_facts:
-      redirect: community.general.gcp_compute_forwarding_rule_facts
+      redirect: google.cloud.gcp_compute_forwarding_rule_info
     gcp_compute_global_address_facts:
-      redirect: community.general.gcp_compute_global_address_facts
+      redirect: google.cloud.gcp_compute_global_address_info
     gcp_compute_global_forwarding_rule_facts:
-      redirect: community.general.gcp_compute_global_forwarding_rule_facts
+      redirect: google.cloud.gcp_compute_global_forwarding_rule_info
     gcp_compute_health_check_facts:
-      redirect: community.general.gcp_compute_health_check_facts
+      redirect: google.cloud.gcp_compute_health_check_info
     gcp_compute_http_health_check_facts:
-      redirect: community.general.gcp_compute_http_health_check_facts
+      redirect: google.cloud.gcp_compute_http_health_check_info
     gcp_compute_https_health_check_facts:
-      redirect: community.general.gcp_compute_https_health_check_facts
+      redirect: google.cloud.gcp_compute_https_health_check_info
     gcp_compute_image_facts:
-      redirect: community.general.gcp_compute_image_facts
+      redirect: google.cloud.gcp_compute_image_info
     gcp_compute_instance_facts:
-      redirect: community.general.gcp_compute_instance_facts
+      redirect: google.cloud.gcp_compute_instance_info
     gcp_compute_instance_group_facts:
-      redirect: community.general.gcp_compute_instance_group_facts
+      redirect: google.cloud.gcp_compute_instance_group_info
     gcp_compute_instance_group_manager_facts:
-      redirect: community.general.gcp_compute_instance_group_manager_facts
+      redirect: google.cloud.gcp_compute_instance_group_manager_info
     gcp_compute_instance_template_facts:
-      redirect: community.general.gcp_compute_instance_template_facts
+      redirect: google.cloud.gcp_compute_instance_template_info
     gcp_compute_interconnect_attachment_facts:
-      redirect: community.general.gcp_compute_interconnect_attachment_facts
+      redirect: google.cloud.gcp_compute_interconnect_attachment_info
     gcp_compute_network_facts:
-      redirect: community.general.gcp_compute_network_facts
+      redirect: google.cloud.gcp_compute_network_info
     gcp_compute_region_disk_facts:
-      redirect: community.general.gcp_compute_region_disk_facts
+      redirect: google.cloud.gcp_compute_region_disk_info
     gcp_compute_route_facts:
-      redirect: community.general.gcp_compute_route_facts
+      redirect: google.cloud.gcp_compute_route_info
     gcp_compute_router_facts:
-      redirect: community.general.gcp_compute_router_facts
+      redirect: google.cloud.gcp_compute_router_info
     gcp_compute_ssl_certificate_facts:
-      redirect: community.general.gcp_compute_ssl_certificate_facts
+      redirect: google.cloud.gcp_compute_ssl_certificate_info
     gcp_compute_ssl_policy_facts:
-      redirect: community.general.gcp_compute_ssl_policy_facts
+      redirect: google.cloud.gcp_compute_ssl_policy_info
     gcp_compute_subnetwork_facts:
-      redirect: community.general.gcp_compute_subnetwork_facts
+      redirect: google.cloud.gcp_compute_subnetwork_info
     gcp_compute_target_http_proxy_facts:
-      redirect: community.general.gcp_compute_target_http_proxy_facts
+      redirect: google.cloud.gcp_compute_target_http_proxy_info
     gcp_compute_target_https_proxy_facts:
-      redirect: community.general.gcp_compute_target_https_proxy_facts
+      redirect: google.cloud.gcp_compute_target_https_proxy_info
     gcp_compute_target_pool_facts:
-      redirect: community.general.gcp_compute_target_pool_facts
+      redirect: google.cloud.gcp_compute_target_pool_info
     gcp_compute_target_ssl_proxy_facts:
-      redirect: community.general.gcp_compute_target_ssl_proxy_facts
+      redirect: google.cloud.gcp_compute_target_ssl_proxy_info
     gcp_compute_target_tcp_proxy_facts:
-      redirect: community.general.gcp_compute_target_tcp_proxy_facts
+      redirect: google.cloud.gcp_compute_target_tcp_proxy_info
     gcp_compute_target_vpn_gateway_facts:
-      redirect: community.general.gcp_compute_target_vpn_gateway_facts
+      redirect: google.cloud.gcp_compute_target_vpn_gateway_info
     gcp_compute_url_map_facts:
-      redirect: community.general.gcp_compute_url_map_facts
+      redirect: google.cloud.gcp_compute_url_map_info
     gcp_compute_vpn_tunnel_facts:
-      redirect: community.general.gcp_compute_vpn_tunnel_facts
+      redirect: google.cloud.gcp_compute_vpn_tunnel_info
     gcp_container_cluster_facts:
-      redirect: community.general.gcp_container_cluster_facts
+      redirect: google.cloud.gcp_container_cluster_info
     gcp_container_node_pool_facts:
-      redirect: community.general.gcp_container_node_pool_facts
+      redirect: google.cloud.gcp_container_node_pool_info
     gcp_dns_managed_zone_facts:
-      redirect: community.general.gcp_dns_managed_zone_facts
+      redirect: google.cloud.gcp_dns_managed_zone_info
     gcp_dns_resource_record_set_facts:
-      redirect: community.general.gcp_dns_resource_record_set_facts
+      redirect: google.cloud.gcp_dns_resource_record_set_info
     gcp_forwarding_rule:
       redirect: community.general.gcp_forwarding_rule
     gcp_healthcheck:
       redirect: community.general.gcp_healthcheck
     gcp_iam_role_facts:
-      redirect: community.general.gcp_iam_role_facts
+      redirect: google.cloud.gcp_iam_role_info
     gcp_iam_service_account_facts:
-      redirect: community.general.gcp_iam_service_account_facts
+      redirect: google.cloud.gcp_iam_service_account_info
     gcp_pubsub_subscription_facts:
-      redirect: community.general.gcp_pubsub_subscription_facts
+      redirect: google.cloud.gcp_pubsub_subscription_info
     gcp_pubsub_topic_facts:
-      redirect: community.general.gcp_pubsub_topic_facts
+      redirect: google.cloud.gcp_pubsub_topic_info
     gcp_redis_instance_facts:
-      redirect: community.general.gcp_redis_instance_facts
+      redirect: google.cloud.gcp_redis_instance_info
     gcp_resourcemanager_project_facts:
-      redirect: community.general.gcp_resourcemanager_project_facts
+      redirect: google.cloud.gcp_resourcemanager_project_info
     gcp_sourcerepo_repository_facts:
-      redirect: community.general.gcp_sourcerepo_repository_facts
+      redirect: google.cloud.gcp_sourcerepo_repository_info
     gcp_spanner_database_facts:
-      redirect: community.general.gcp_spanner_database_facts
+      redirect: google.cloud.gcp_spanner_database_info
     gcp_spanner_instance_facts:
-      redirect: community.general.gcp_spanner_instance_facts
+      redirect: google.cloud.gcp_spanner_instance_info
     gcp_sql_database_facts:
-      redirect: community.general.gcp_sql_database_facts
+      redirect: google.cloud.gcp_sql_database_info
     gcp_sql_instance_facts:
-      redirect: community.general.gcp_sql_instance_facts
+      redirect: google.cloud.gcp_sql_instance_info
     gcp_sql_user_facts:
-      redirect: community.general.gcp_sql_user_facts
+      redirect: google.cloud.gcp_sql_user_info
     gcp_target_proxy:
       redirect: community.general.gcp_target_proxy
     gcp_tpu_node_facts:
-      redirect: community.general.gcp_tpu_node_facts
+      redirect: google.cloud.gcp_tpu_node_info
     gcp_url_map:
       redirect: community.general.gcp_url_map
     gcpubsub_facts:
@@ -2787,8 +2790,6 @@ plugin_routing:
       redirect: community.general.hponcfg
     imc_rest:
       redirect: community.general.imc_rest
-    intersight_info:
-      redirect: community.general.intersight_info
     ipmi_boot:
       redirect: community.general.ipmi_boot
     ipmi_power:
@@ -5628,7 +5629,9 @@ plugin_routing:
     asa_command:
       redirect: cisco.asa.asa_command
     intersight_facts:
-      redirect: cisco.intersight.intersight_facts
+      redirect: cisco.intersight.intersight_info
+    intersight_info:
+      redirect: community.general.intersight_info
     intersight_rest_api:
       redirect: cisco.intersight.intersight_rest_api
     ios_l3_interfaces:
@@ -6374,113 +6377,113 @@ plugin_routing:
     bigiq_utility_license_assignment:
       redirect: f5networks.f5_modules.bigiq_utility_license_assignment
     os_auth:
-      redirect: openstack.cloud.os_auth
+      redirect: openstack.cloud.auth
     os_client_config:
-      redirect: openstack.cloud.os_client_config
+      redirect: openstack.cloud.config
     os_coe_cluster:
-      redirect: openstack.cloud.os_coe_cluster
+      redirect: openstack.cloud.coe_cluster
     os_coe_cluster_template:
-      redirect: openstack.cloud.os_coe_cluster_template
+      redirect: openstack.cloud.coe_cluster_template
     os_flavor_info:
-      redirect: openstack.cloud.os_flavor_info
+      redirect: openstack.cloud.compute_flavor_info
     os_floating_ip:
-      redirect: openstack.cloud.os_floating_ip
+      redirect: openstack.cloud.floating_ip
     os_group:
-      redirect: openstack.cloud.os_group
+      redirect: openstack.cloud.identity_group
     os_group_info:
-      redirect: openstack.cloud.os_group_info
+      redirect: openstack.cloud.identity_group_info
     os_image:
-      redirect: openstack.cloud.os_image
+      redirect: openstack.cloud.image
     os_image_info:
-      redirect: openstack.cloud.os_image_info
+      redirect: openstack.cloud.image_info
     os_ironic:
-      redirect: openstack.cloud.os_ironic
+      redirect: openstack.cloud.baremetal_node
     os_ironic_inspect:
-      redirect: openstack.cloud.os_ironic_inspect
+      redirect: openstack.cloud.baremetal_inspect
     os_ironic_node:
-      redirect: openstack.cloud.os_ironic_node
+      redirect: openstack.cloud.baremetal_node_action
     os_keypair:
-      redirect: openstack.cloud.os_keypair
+      redirect: openstack.cloud.keypair
     os_keystone_domain:
-      redirect: openstack.cloud.os_keystone_domain
+      redirect: openstack.cloud.identity_domain
     os_keystone_domain_info:
-      redirect: openstack.cloud.os_keystone_domain_info
+      redirect: openstack.cloud.identity_domain_info
     os_keystone_endpoint:
-      redirect: openstack.cloud.os_keystone_endpoint
+      redirect: openstack.cloud.endpoint
     os_keystone_role:
-      redirect: openstack.cloud.os_keystone_role
+      redirect: openstack.cloud.identity_role
     os_keystone_service:
-      redirect: openstack.cloud.os_keystone_service
+      redirect: openstack.cloud.catalog_service
     os_listener:
-      redirect: openstack.cloud.os_listener
+      redirect: openstack.cloud.lb_listener
     os_loadbalancer:
-      redirect: openstack.cloud.os_loadbalancer
+      redirect: openstack.cloud.loadbalancer
     os_member:
-      redirect: openstack.cloud.os_member
+      redirect: openstack.cloud.lb_member
     os_network:
-      redirect: openstack.cloud.os_network
+      redirect: openstack.cloud.network
     os_networks_info:
-      redirect: openstack.cloud.os_networks_info
+      redirect: openstack.cloud.networks_info
     os_nova_flavor:
-      redirect: openstack.cloud.os_nova_flavor
+      redirect: openstack.cloud.compute_flavor
     os_nova_host_aggregate:
-      redirect: openstack.cloud.os_nova_host_aggregate
+      redirect: openstack.cloud.host_aggregate
     os_object:
-      redirect: openstack.cloud.os_object
+      redirect: openstack.cloud.object
     os_pool:
-      redirect: openstack.cloud.os_pool
+      redirect: openstack.cloud.lb_pool
     os_port:
-      redirect: openstack.cloud.os_port
+      redirect: openstack.cloud.port
     os_port_info:
-      redirect: openstack.cloud.os_port_info
+      redirect: openstack.cloud.port_info
     os_project:
-      redirect: openstack.cloud.os_project
+      redirect: openstack.cloud.project
     os_project_access:
-      redirect: openstack.cloud.os_project_access
+      redirect: openstack.cloud.project_access
     os_project_info:
-      redirect: openstack.cloud.os_project_info
+      redirect: openstack.cloud.project_info
     os_quota:
-      redirect: openstack.cloud.os_quota
+      redirect: openstack.cloud.quota
     os_recordset:
-      redirect: openstack.cloud.os_recordset
+      redirect: openstack.cloud.recordset
     os_router:
-      redirect: openstack.cloud.os_router
+      redirect: openstack.cloud.router
     os_security_group:
-      redirect: openstack.cloud.os_security_group
+      redirect: openstack.cloud.security_group
     os_security_group_rule:
-      redirect: openstack.cloud.os_security_group_rule
+      redirect: openstack.cloud.security_group_rule
     os_server:
-      redirect: openstack.cloud.os_server
+      redirect: openstack.cloud.server
     os_server_action:
-      redirect: openstack.cloud.os_server_action
+      redirect: openstack.cloud.server_action
     os_server_group:
-      redirect: openstack.cloud.os_server_group
+      redirect: openstack.cloud.server_group
     os_server_info:
-      redirect: openstack.cloud.os_server_info
+      redirect: openstack.cloud.server_info
     os_server_metadata:
-      redirect: openstack.cloud.os_server_metadata
+      redirect: openstack.cloud.server_metadata
     os_server_volume:
-      redirect: openstack.cloud.os_server_volume
+      redirect: openstack.cloud.server_volume
     os_stack:
-      redirect: openstack.cloud.os_stack
+      redirect: openstack.cloud.stack
     os_subnet:
-      redirect: openstack.cloud.os_subnet
+      redirect: openstack.cloud.subnet
     os_subnets_info:
-      redirect: openstack.cloud.os_subnets_info
+      redirect: openstack.cloud.subnets_info
     os_user:
-      redirect: openstack.cloud.os_user
+      redirect: openstack.cloud.identity_user
     os_user_group:
-      redirect: openstack.cloud.os_user_group
+      redirect: openstack.cloud.group_assignment
     os_user_info:
-      redirect: openstack.cloud.os_user_info
+      redirect: openstack.cloud.identity_user_info
     os_user_role:
-      redirect: openstack.cloud.os_user_role
+      redirect: openstack.cloud.role_assignment
     os_volume:
-      redirect: openstack.cloud.os_volume
+      redirect: openstack.cloud.volume
     os_volume_snapshot:
-      redirect: openstack.cloud.os_volume_snapshot
+      redirect: openstack.cloud.volume_snapshot
     os_zone:
-      redirect: openstack.cloud.os_zone
+      redirect: openstack.cloud.dns_zone
     junos_user:
       redirect: junipernetworks.junos.junos_user
     junos_l2_interface:
@@ -6774,9 +6777,9 @@ plugin_routing:
     skydive_node:
       redirect: skydive.skydive.skydive_node
     cyberark_authentication:
-      redirect: cyberark.bizdev.cyberark_authentication
+      redirect: cyberark.pas.cyberark_authentication
     cyberark_user:
-      redirect: cyberark.bizdev.cyberark_user
+      redirect: cyberark.pas.cyberark_user
     gcp_appengine_firewall_rule:
       redirect: google.cloud.gcp_appengine_firewall_rule
     gcp_appengine_firewall_rule_info:

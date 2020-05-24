@@ -94,6 +94,10 @@ from .venv import (
     create_virtual_environment,
 )
 
+from .ci import (
+    get_ci_provider,
+)
+
 
 def check_delegation_args(args):
     """
@@ -117,6 +121,8 @@ def delegate(args, exclude, require, integration_targets):
     :rtype: bool
     """
     if isinstance(args, TestConfig):
+        args.metadata.ci_provider = get_ci_provider().code
+
         make_dirs(ResultType.TMP.path)
 
         with tempfile.NamedTemporaryFile(prefix='metadata-', suffix='.json', dir=ResultType.TMP.path) as metadata_fd:
@@ -350,8 +356,12 @@ def delegate_docker(args, exclude, require, integration_targets):
 
                 networks = get_docker_networks(args, test_id)
 
-                for network in networks:
-                    docker_network_disconnect(args, test_id, network)
+                if networks is not None:
+                    for network in networks:
+                        docker_network_disconnect(args, test_id, network)
+                else:
+                    display.warning('Network disconnection is not supported (this is normal under podman). '
+                                    'Tests will not be isolated from the network. Network-related tests may misbehave.')
 
                 cmd += ['--requirements-mode', 'skip']
 
@@ -546,8 +556,10 @@ def generate_command(args, python_interpreter, ansible_bin_path, content_root, o
     if isinstance(args, ShellConfig):
         cmd = create_shell_command(cmd)
     elif isinstance(args, SanityConfig):
-        if args.base_branch:
-            cmd += ['--base-branch', args.base_branch]
+        base_branch = args.base_branch or get_ci_provider().get_base_branch()
+
+        if base_branch:
+            cmd += ['--base-branch', base_branch]
 
     return cmd
 

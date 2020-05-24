@@ -183,15 +183,15 @@ def main():
         display.review_warnings()
     except ApplicationWarning as ex:
         display.warning(u'%s' % ex)
-        exit(0)
+        sys.exit(0)
     except ApplicationError as ex:
         display.error(u'%s' % ex)
-        exit(1)
+        sys.exit(1)
     except KeyboardInterrupt:
-        exit(2)
+        sys.exit(2)
     except IOError as ex:
         if ex.errno == errno.EPIPE:
-            exit(3)
+            sys.exit(3)
         raise
 
 
@@ -308,6 +308,9 @@ def parse_args():
 
     test.add_argument('--metadata',
                       help=argparse.SUPPRESS)
+
+    test.add_argument('--base-branch',
+                      help='base branch used for change detection')
 
     add_changes(test, argparse)
     add_environments(test)
@@ -527,8 +530,9 @@ def parse_args():
                         choices=SUPPORTED_PYTHON_VERSIONS + ('default',),
                         help='python version: %s' % ', '.join(SUPPORTED_PYTHON_VERSIONS))
 
-    sanity.add_argument('--base-branch',
-                        help=argparse.SUPPRESS)
+    sanity.add_argument('--enable-optional-errors',
+                        action='store_true',
+                        help='enable optional errors')
 
     add_lint(sanity)
     add_extra_docker_options(sanity, integration=False)
@@ -671,7 +675,7 @@ def key_value(argparse, value):  # type: (argparse_module, str) -> t.Tuple[str, 
     if len(parts) != 2:
         raise argparse.ArgumentTypeError('"%s" must be in the format "key=value"' % value)
 
-    return tuple(parts)
+    return parts[0], parts[1]
 
 
 # noinspection PyProtectedMember

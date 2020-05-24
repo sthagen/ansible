@@ -8,7 +8,6 @@ import sys
 from . import types as t
 
 from .util import (
-    is_shippable,
     docker_qualify_image,
     find_python,
     generate_pip_command,
@@ -194,6 +193,7 @@ class TestConfig(EnvironmentConfig):
         self.unstaged = args.unstaged  # type: bool
         self.changed_from = args.changed_from  # type: str
         self.changed_path = args.changed_path  # type: t.List[str]
+        self.base_branch = args.base_branch  # type: str
 
         self.lint = args.lint if 'lint' in args else False  # type: bool
         self.junit = args.junit if 'junit' in args else False  # type: bool
@@ -241,17 +241,7 @@ class SanityConfig(TestConfig):
         self.skip_test = args.skip_test  # type: t.List[str]
         self.list_tests = args.list_tests  # type: bool
         self.allow_disabled = args.allow_disabled  # type: bool
-
-        if args.base_branch:
-            self.base_branch = args.base_branch  # str
-        elif is_shippable():
-            self.base_branch = os.environ.get('BASE_BRANCH', '')  # str
-
-            if self.base_branch:
-                self.base_branch = 'origin/%s' % self.base_branch
-        else:
-            self.base_branch = ''
-
+        self.enable_optional_errors = args.enable_optional_errors  # type: bool
         self.info_stderr = self.lint
 
 

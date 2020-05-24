@@ -224,7 +224,7 @@ class CollectionRequirement:
                         _extract_tar_file(collection_tar, file_name, b_collection_path, b_temp_path,
                                           expected_hash=file_info['chksum_sha256'])
                     else:
-                        os.makedirs(os.path.join(b_collection_path, to_bytes(file_name, errors='surrogate_or_strict')))
+                        os.makedirs(os.path.join(b_collection_path, to_bytes(file_name, errors='surrogate_or_strict')), mode=0o0755)
         except Exception:
             # Ensure we don't leave the dir behind in case of a failure.
             shutil.rmtree(b_collection_path)
@@ -386,7 +386,7 @@ class CollectionRequirement:
                                      metadata=meta, files=files, allow_pre_releases=allow_pre_release)
 
     @staticmethod
-    def from_path(b_path, force, parent=None):
+    def from_path(b_path, force, parent=None, fallback_metadata=False):
         info = {}
         for b_file_name, property_name in CollectionRequirement._FILE_MAPPING:
             b_file_path = os.path.join(b_path, b_file_name)
@@ -399,6 +399,13 @@ class CollectionRequirement:
                 except ValueError:
                     raise AnsibleError("Collection file at '%s' does not contain a valid json string."
                                        % to_native(b_file_path))
+        if not info and fallback_metadata:
+            b_galaxy_path = os.path.join(b_path, b'galaxy.yml')
+            if os.path.exists(b_galaxy_path):
+                collection_meta = _get_galaxy_yml(b_galaxy_path)
+                info['files_file'] = _build_files_manifest(b_path, collection_meta['namespace'], collection_meta['name'],
+                                                           collection_meta['build_ignore'])
+                info['manifest_file'] = _build_manifest(**collection_meta)
 
         allow_pre_release = False
         if 'manifest_file' in info:
@@ -419,8 +426,11 @@ class CollectionRequirement:
 
             dependencies = manifest['dependencies']
         else:
-            display.warning("Collection at '%s' does not have a MANIFEST.json file, cannot detect version."
-                            % to_text(b_path))
+            if fallback_metadata:
+                warning = "Collection at '%s' does not have a galaxy.yml or a MANIFEST.json file, cannot detect version."
+            else:
+                warning = "Collection at '%s' does not have a MANIFEST.json file, cannot detect version."
+            display.warning(warning % to_text(b_path))
             parent_dir, name = os.path.split(to_text(b_path, errors='surrogate_or_strict'))
             namespace = os.path.split(parent_dir)[1]
 
@@ -595,7 +605,7 @@ def install_collections(collections, output_path, apis, validate_certs, ignore_e
     :param force: Re-install a collection if it has already been installed.
     :param force_deps: Re-install a collection as well as its dependencies if they have already been installed.
     """
-    existing_collections = find_existing_collections(output_path)
+    existing_collections = find_existing_collections(output_path, fallback_metadata=True)
 
     with _tempdir() as b_temp_path:
         display.display("Process install dependency map")
@@ -668,6 +678,11 @@ def verify_collections(collections, search_paths, apis, validate_certs, ignore_e
                     for search_path in search_paths:
                         b_search_path = to_bytes(os.path.join(search_path, namespace, name), errors='surrogate_or_strict')
                         if os.path.isdir(b_search_path):
+                            if not os.path.isfile(os.path.join(to_text(b_search_path, errors='surrogate_or_strict'), 'MANIFEST.json')):
+                                raise AnsibleError(
+                                    message="Collection %s does not appear to have a MANIFEST.json. " % collection_name +
+                                            "A MANIFEST.json is expected if the collection has been built and installed via ansible-galaxy."
+                                )
                             local_collection = CollectionRequirement.from_path(b_search_path, False)
                             break
                     if local_collection is None:
@@ -993,7 +1008,7 @@ def _build_collection_tar(b_collection_path, b_tar_path, collection_manifest, fi
         display.display('Created collection for %s at %s' % (collection_name, to_text(b_tar_path)))
 
 
-def find_existing_collections(path):
+def find_existing_collections(path, fallback_metadata=False):
     collections = []
 
     b_path = to_bytes(path, errors='surrogate_or_strict')
@@ -1005,7 +1020,7 @@ def find_existing_collections(path):
         for b_collection in os.listdir(b_namespace_path):
             b_collection_path = os.path.join(b_namespace_path, b_collection)
             if os.path.isdir(b_collection_path):
-                req = CollectionRequirement.from_path(b_collection_path, False)
+                req = CollectionRequirement.from_path(b_collection_path, False, fallback_metadata=fallback_metadata)
                 display.vvv("Found installed collection %s:%s at '%s'" % (to_text(req), req.latest_version,
                                                                           to_text(b_collection_path)))
                 collections.append(req)
