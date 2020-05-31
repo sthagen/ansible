@@ -45,7 +45,7 @@ Collections follow a simple data structure. None of the directories are required
 
 
 .. note::
-    * Ansible only accepts ``.yml`` extensions for :file:`galaxy.yml`, and ``.md`` for the :file:`README` file and any files in the :file:`/docs` folder.
+    * Ansible only accepts ``.md`` extensions for the :file:`README` file and any files in the :file:`/docs` folder.
     * See the `ansible-collections <https://github.com/ansible-collections/>`_ GitHub Org for examples of collection structure.
     * Not all directories are currently in use. Those are placeholders for future features.
 
@@ -207,6 +207,10 @@ To start a new collection:
 
     collection_dir#> ansible-galaxy collection init my_namespace.my_collection
 
+.. note::
+
+	Both the namespace and collection names have strict requirements. See `Galaxy namespaces <https://galaxy.ansible.com/docs/contributing/namespaces.html#galaxy-namespaces>`_ on the Galaxy docsite for details.
+
 Once the skeleton exists, you can populate the directories with the content you want inside the collection. See `ansible-collections <https://github.com/ansible-collections/>`_ GitHub Org to get a better idea of what you can place inside a collection.
 
 .. _creating_collections:
@@ -339,6 +343,19 @@ installs the collection in the first path defined in :ref:`COLLECTIONS_PATHS`, w
 
 Next, try using the local collection inside a playbook. For examples and more details see :ref:`Using collections <using_collections>`
 
+.. _collections_scm_install:
+
+Installing collections from a git repository
+--------------------------------------------
+
+You can also test a version of your collection in development by installing it from a git repository.
+
+.. code-block:: bash
+
+   ansible-galaxy collection install git+https://github.com/org/repo.git,devel
+
+.. include:: ../shared_snippets/installing_collections_git_repo.txt
+
 .. _publishing_collections:
 
 Publishing collections
@@ -373,7 +390,7 @@ Using the ``token`` argument
 
 You can use the ``--token`` argument with the ``ansible-galaxy`` command (in conjunction with the ``--server`` argument or :ref:`GALAXY_SERVER` setting in your :file:`ansible.cfg` file). You cannot use ``apt-key`` with any servers defined in your :ref:`Galaxy server list <galaxy_server_config>`.
 
-.. code-block:: bash
+.. code-block:: text
 
     ansible-galaxy collection publish ./geerlingguy-collection-1.2.3.tar.gz --token=<key goes here>
 

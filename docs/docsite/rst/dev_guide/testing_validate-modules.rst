@@ -66,6 +66,7 @@ Codes
   ansible-module-not-initialized                               Syntax               Error                  Execution of the module did not result in initialization of AnsibleModule
   collection-deprecated-version                                Documentation        Error                  A feature is deprecated and supposed to be removed in the current or an earlier collection version
   collection-invalid-version                                   Documentation        Error                  The collection version at which a feature is supposed to be removed cannot be parsed (it must be a semantic version, see https://semver.org/)
+  deprecated-date                                              Documentation        Error                  A date before today appears as ``removed_at_date`` or in ``deprecated_aliases``
   deprecation-mismatch                                         Documentation        Error                  Module marked as deprecated or removed in at least one of the filename, its metadata, or in DOCUMENTATION (setting DOCUMENTATION.deprecated for deprecation or removing all Documentation for removed) but not in all three places.
   doc-choices-do-not-match-spec                                Documentation        Error                  Value for "choices" from the argument_spec does not match the documentation
   doc-choices-incompatible-type                                Documentation        Error                  Choices value from the documentation is not compatible with type defined in the argument_spec
@@ -94,8 +95,10 @@ Codes
   invalid-extension                                            Naming               Error                  Official Ansible modules must have a ``.py`` extension for python modules or a ``.ps1`` for powershell modules
   invalid-metadata-status                                      Documentation        Error                  ``ANSIBLE_METADATA.status`` of deprecated or removed can't include other statuses
   invalid-metadata-type                                        Documentation        Error                  ``ANSIBLE_METADATA`` was not provided as a dict, YAML not supported, Invalid ``ANSIBLE_METADATA`` schema
+  invalid-module-deprecation-source                            Documentation        Error                  The deprecated version for the module must not be from a documentation fragment from another collection or Ansible-base
   invalid-module-schema                                        Documentation        Error                  ``AnsibleModule`` schema validation error
   invalid-requires-extension                                   Naming               Error                  Module ``#AnsibleRequires -CSharpUtil`` should not end in .cs, Module ``#Requires`` should not end in .psm1
+  invalid-tagged-version                                       Documentation        Error                  All version numbers specified in code have to be explicitly tagged with the collection name, i.e. ``community.general:1.2.3`` or ``ansible.builtin:2.10``
   last-line-main-call                                          Syntax               Error                  Call to ``main()`` not the last line (or ``removed_module()`` in the case of deprecated & docs only modules)
   metadata-changed                                             Documentation        Error                  ``ANSIBLE_METADATA`` cannot be changed in a point release for a stable branch
   missing-doc-fragment                                         Documentation        Error                  ``DOCUMENTATION`` fragment missing

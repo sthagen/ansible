@@ -793,6 +793,47 @@ test_no_log - Invoked with:
         $actual | Assert-DictionaryEquals -Expected $expected
     }
 
+    "Removed at date" = {
+        $spec = @{
+            options = @{
+                removed1 = @{removed_at_date = [DateTime]"2020-03-10"}
+                removed2 = @{removed_at_date = [DateTime]"2020-03-11"}
+            }
+        }
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            removed1 = "value"
+        }
+
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $expected = @{
+            changed = $false
+            invocation = @{
+                module_args = @{
+                    removed1 = "value"
+                    removed2 = $null
+                }
+            }
+            deprecations = @(
+                @{
+                    msg = "Param 'removed1' is deprecated. See the module docs for more information"
+                    date = "2020-03-10"
+                }
+            )
+        }
+        $actual | Assert-DictionaryEquals -Expected $expected
+    }
+
     "Deprecated aliases" = {
         $spec = @{
             options = @{
@@ -803,8 +844,12 @@ test_no_log - Invoked with:
                     options = @{
                         option1 = @{ type = "str"; aliases = "alias1"; deprecated_aliases = @(@{name = "alias1"; version = "2.10"}) }
                         option2 = @{ type = "str"; aliases = "alias2"; deprecated_aliases = @(@{name = "alias2"; version = "2.11"}) }
+                        option3 = @{ type = "str"; aliases = "alias3"; deprecated_aliases = @(@{name = "alias3"; date = [DateTime]"2020-03-11"}) }
+                        option4 = @{ type = "str"; aliases = "alias4"; deprecated_aliases = @(@{name = "alias4"; date = [DateTime]"2020-03-09"}) }
                     }
                 }
+                option4 = @{ type = "str"; aliases = "alias4"; deprecated_aliases = @(@{name = "alias4"; date = [DateTime]"2020-03-10"}) }
+                option5 = @{ type = "str"; aliases = "alias5"; deprecated_aliases = @(@{name = "alias5"; date = [DateTime]"2020-03-12"}) }
             }
         }
 
@@ -814,7 +859,11 @@ test_no_log - Invoked with:
             option3 = @{
                 option1 = "option1"
                 alias2 = "alias2"
+                option3 = "option3"
+                alias4 = "alias4"
             }
+            option4 = "option4"
+            alias5 = "alias5"
         }
 
         $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
@@ -839,7 +888,13 @@ test_no_log - Invoked with:
                         option1 = "option1"
                         option2 = "alias2"
                         alias2 = "alias2"
+                        option3 = "option3"
+                        option4 = "alias4"
+                        alias4 = "alias4"
                     }
+                    option4 = "option4"
+                    option5 = "alias5"
+                    alias5 = "alias5"
                 }
             }
             deprecations = @(
@@ -848,8 +903,16 @@ test_no_log - Invoked with:
                     version = "2.10"
                 },
                 @{
+                    msg = "Alias 'alias5' is deprecated. See the module docs for more information"
+                    date = "2020-03-12"
+                }
+                @{
                     msg = "Alias 'alias2' is deprecated. See the module docs for more information - found in option3"
                     version = "2.11"
+                }
+                @{
+                    msg = "Alias 'alias4' is deprecated. See the module docs for more information - found in option3"
+                    date = "2020-03-09"
                 }
             )
         }
@@ -1076,7 +1139,7 @@ test_no_log - Invoked with:
         $actual_event | Assert-Equals -Expected "undefined win module - [DEBUG] debug message"
     }
 
-    "Deprecate and warn" = {
+    "Deprecate and warn with version" = {
         $m = [Ansible.Basic.AnsibleModule]::Create(@(), @{})
         $m.Deprecate("message", "2.8")
         $actual_deprecate_event = Get-EventLog -LogName Application -Source Ansible -Newest 1
@@ -1104,6 +1167,38 @@ test_no_log - Invoked with:
             }
             warnings = @("warning")
             deprecations = @(@{msg = "message"; version = "2.8"})
+        }
+        $actual | Assert-DictionaryEquals -Expected $expected
+    }
+
+    "Deprecate and warn with date" = {
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), @{})
+        $m.Deprecate("message", [DateTime]"2020-01-02")
+        $actual_deprecate_event = Get-EventLog -LogName Application -Source Ansible -Newest 1
+        $m.Warn("warning")
+        $actual_warn_event = Get-EventLog -LogName Application -Source Ansible -Newest 1
+
+        $actual_deprecate_event.Message | Assert-Equals -Expected "undefined win module - [DEPRECATION WARNING] message 2020-01-02"
+        $actual_warn_event.EntryType | Assert-Equals -Expected "Warning"
+        $actual_warn_event.Message | Assert-Equals -Expected "undefined win module - [WARNING] warning"
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $expected = @{
+            changed = $false
+            invocation = @{
+                module_args = @{}
+            }
+            warnings = @("warning")
+            deprecations = @(@{msg = "message"; date = "2020-01-02"})
         }
         $actual | Assert-DictionaryEquals -Expected $expected
     }
@@ -1532,8 +1627,8 @@ test_no_log - Invoked with:
 
         $expected_msg = "internal error: argument spec entry contains an invalid key 'invalid', valid keys: apply_defaults, "
         $expected_msg += "aliases, choices, default, deprecated_aliases, elements, mutually_exclusive, no_log, options, "
-        $expected_msg += "removed_in_version, required, required_by, required_if, required_one_of, required_together, "
-        $expected_msg += "supports_check_mode, type"
+        $expected_msg += "removed_in_version, removed_at_date, required, required_by, required_if, required_one_of, "
+        $expected_msg += "required_together, supports_check_mode, type"
 
         $actual.Keys.Count | Assert-Equals -Expected 3
         $actual.failed | Assert-Equals -Expected $true
@@ -1565,8 +1660,8 @@ test_no_log - Invoked with:
 
         $expected_msg = "internal error: argument spec entry contains an invalid key 'invalid', valid keys: apply_defaults, "
         $expected_msg += "aliases, choices, default, deprecated_aliases, elements, mutually_exclusive, no_log, options, "
-        $expected_msg += "removed_in_version, required, required_by, required_if, required_one_of, required_together, "
-        $expected_msg += "supports_check_mode, type - found in option_key -> sub_option_key"
+        $expected_msg += "removed_in_version, removed_at_date, required, required_by, required_if, required_one_of, "
+        $expected_msg += "required_together, supports_check_mode, type - found in option_key -> sub_option_key"
 
         $actual.Keys.Count | Assert-Equals -Expected 3
         $actual.failed | Assert-Equals -Expected $true
@@ -1652,7 +1747,7 @@ test_no_log - Invoked with:
         ("exception" -cin $actual.Keys) | Assert-Equals -Expected $true
     }
 
-    "Invalid deprecated aliases entry - no version" = {
+    "Invalid deprecated aliases entry - no version and date" = {
         $spec = @{
             options = @{
                 option_key = @{
@@ -1675,7 +1770,7 @@ test_no_log - Invoked with:
         }
         $failed | Assert-Equals -Expected $true
 
-        $expected_msg = "internal error: version is required in a deprecated_aliases entry"
+        $expected_msg = "internal error: One of version or date is required in a deprecated_aliases entry"
 
         $actual.Keys.Count | Assert-Equals -Expected 3
         $actual.failed | Assert-Equals -Expected $true
@@ -1716,6 +1811,75 @@ test_no_log - Invoked with:
             $_.Exception.Message | Assert-Equals -Expected $expected_msg
         }
         $failed | Assert-Equals -Expected $true
+    }
+
+    "Invalid deprecated aliases entry - both version and date" = {
+        $spec = @{
+            options = @{
+                option_key = @{
+                    type = "str"
+                    aliases = ,"alias_name"
+                    deprecated_aliases = @(
+                        @{
+                            name = "alias_name"
+                            date = [DateTime]"2020-03-10"
+                            version = "2.11"
+                        }
+                    )
+                }
+            }
+        }
+
+        $failed = $false
+        try {
+            $null = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 1"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $expected_msg = "internal error: Only one of version or date is allowed in a deprecated_aliases entry"
+
+        $actual.Keys.Count | Assert-Equals -Expected 3
+        $actual.failed | Assert-Equals -Expected $true
+        $actual.msg | Assert-Equals -Expected $expected_msg
+        ("exception" -cin $actual.Keys) | Assert-Equals -Expected $true
+    }
+
+    "Invalid deprecated aliases entry - wrong date type" = {
+        $spec = @{
+            options = @{
+                option_key = @{
+                    type = "str"
+                    aliases = ,"alias_name"
+                    deprecated_aliases = @(
+                        @{
+                            name = "alias_name"
+                            date = "2020-03-10"
+                        }
+                    )
+                }
+            }
+        }
+
+        $failed = $false
+        try {
+            $null = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 1"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $expected_msg = "internal error: A deprecated_aliases date must be a DateTime object"
+
+        $actual.Keys.Count | Assert-Equals -Expected 3
+        $actual.failed | Assert-Equals -Expected $true
+        $actual.msg | Assert-Equals -Expected $expected_msg
+        ("exception" -cin $actual.Keys) | Assert-Equals -Expected $true
     }
 
     "Spec required and default set at the same time" = {
@@ -2537,6 +2701,301 @@ test_no_log - Invoked with:
         $actual.Length | Assert-Equals -Expected 1
         $actual[0] | Assert-DictionaryEquals -Expected @{"abc" = "def"}
     }
+
+    "Spec with fragments" = {
+        $spec = @{
+            options = @{
+                option1 = @{ type = "str" }
+            }
+        }
+        $fragment1 = @{
+            options = @{
+                option2 = @{ type = "str" }
+            }
+        }
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            option1 = "option1"
+            option2 = "option2"
+        }
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec, @($fragment1))
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.changed | Assert-Equals -Expected $false
+        $actual.invocation | Assert-DictionaryEquals -Expected @{module_args = $complex_args}
+    }
+
+    "Fragment spec that with a deprecated alias" = {
+        $spec = @{
+            options = @{
+                option1 = @{
+                    aliases = @("alias1_spec")
+                    type = "str"
+                    deprecated_aliases = @(
+                        @{name = "alias1_spec"; version = "2.0"}
+                    )
+                }
+                option2 = @{
+                    aliases = @("alias2_spec")
+                    deprecated_aliases = @(
+                        @{name = "alias2_spec"; version = "2.0"}
+                    )
+                }
+            }
+        }
+        $fragment1 = @{
+            options = @{
+                option1 = @{
+                    aliases = @("alias1")
+                    deprecated_aliases = @()  # Makes sure it doesn't overwrite the spec, just adds to it.
+                }
+                option2 = @{
+                    aliases = @("alias2")
+                    deprecated_aliases = @(
+                        @{name = "alias2"; version = "2.0"}
+                    )
+                    type = "str"
+                }
+            }
+        }
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            alias1_spec = "option1"
+            alias2 = "option2"
+        }
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec, @($fragment1))
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.deprecations.Count | Assert-Equals -Expected 2
+        $actual.deprecations[0] | Assert-DictionaryEquals -Expected @{
+            msg = "Alias 'alias1_spec' is deprecated. See the module docs for more information"; version = "2.0"
+        }
+        $actual.deprecations[1] | Assert-DictionaryEquals -Expected @{
+            msg = "Alias 'alias2' is deprecated. See the module docs for more information"; version = "2.0"
+        }
+        $actual.changed | Assert-Equals -Expected $false
+        $actual.invocation | Assert-DictionaryEquals -Expected @{
+            module_args = @{
+                option1 = "option1"
+                alias1_spec = "option1"
+                option2 = "option2"
+                alias2 = "option2"
+            }
+        }
+    }
+
+    "Fragment spec with mutual args" = {
+        $spec = @{
+            options = @{
+                option1 = @{ type = "str" }
+                option2 = @{ type = "str" }
+            }
+            mutually_exclusive = @(
+                ,@('option1', 'option2')
+            )
+        }
+        $fragment1 = @{
+            options = @{
+                fragment1_1 = @{ type = "str" }
+                fragment1_2 = @{ type = "str" }
+            }
+            mutually_exclusive = @(
+                ,@('fragment1_1', 'fragment1_2')
+            )
+        }
+        $fragment2 = @{
+            options = @{
+                fragment2 = @{ type = "str" }
+            }
+        }
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            option1 = "option1"
+            fragment1_1 = "fragment1_1"
+            fragment1_2 = "fragment1_2"
+            fragment2 = "fragment2"
+        }
+
+        $failed = $false
+        try {
+            [Ansible.Basic.AnsibleModule]::Create(@(), $spec, @($fragment1, $fragment2))
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 1"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.changed | Assert-Equals -Expected $false
+        $actual.failed | Assert-Equals -Expected $true
+        $actual.msg | Assert-Equals -Expected "parameters are mutually exclusive: fragment1_1, fragment1_2"
+        $actual.invocation | Assert-DictionaryEquals -Expected @{ module_args = $complex_args }
+    }
+
+    "Fragment spec with no_log" = {
+        $spec = @{
+            options = @{
+                option1 = @{
+                    aliases = @("alias")
+                }
+            }
+        }
+        $fragment1 = @{
+            options = @{
+                option1 = @{
+                    no_log = $true  # Makes sure that a value set in the fragment but not in the spec is respected.
+                    type = "str"
+                }
+            }
+        }
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            alias = "option1"
+        }
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec, @($fragment1))
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.changed | Assert-Equals -Expected $false
+        $actual.invocation | Assert-DictionaryEquals -Expected @{
+            module_args = @{
+                option1 = "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
+                alias = "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
+            }
+        }
+    }
+
+    "Catch invalid fragment spec format" = {
+        $spec = @{
+            options = @{
+                option1 = @{ type = "str" }
+            }
+        }
+        $fragment = @{
+            options = @{}
+            invalid = "will fail"
+        }
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            option1 = "option1"
+        }
+
+        $failed = $false
+        try {
+            [Ansible.Basic.AnsibleModule]::Create(@(), $spec, @($fragment))
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 1"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.failed | Assert-Equals -Expected $true
+        $actual.msg.StartsWith("internal error: argument spec entry contains an invalid key 'invalid', valid keys: ") | Assert-Equals -Expected $true
+    }
+
+    "Spec with different list types" = {
+        $spec = @{
+            options = @{
+                # Single element of the same list type not in a list
+                option1 = @{
+                    aliases = "alias1"
+                    deprecated_aliases = @{name="alias1";version="2.0"}
+                }
+
+                # Arrays
+                option2 = @{
+                    aliases = ,"alias2"
+                    deprecated_aliases = ,@{name="alias2";version="2.0"}
+                }
+
+                # ArrayList
+                option3 = @{
+                    aliases = [System.Collections.ArrayList]@("alias3")
+                    deprecated_aliases = [System.Collections.ArrayList]@(@{name="alias3";version="2.0"})
+                }
+
+                # Generic.List[Object]
+                option4 = @{
+                    aliases = [System.Collections.Generic.List[Object]]@("alias4")
+                    deprecated_aliases = [System.Collections.Generic.List[Object]]@(@{name="alias4";version="2.0"})
+                }
+
+                # Generic.List[T]
+                option5 = @{
+                    aliases = [System.Collections.Generic.List[String]]@("alias5")
+                    deprecated_aliases = [System.Collections.Generic.List[Hashtable]]@()
+                }
+            }
+        }
+        $spec.options.option5.deprecated_aliases.Add(@{name="alias5";version="2.0"})
+
+        Set-Variable -Name complex_args -Scope Global -Value @{
+            alias1 = "option1"
+            alias2 = "option2"
+            alias3 = "option3"
+            alias4 = "option4"
+            alias5 = "option5"
+        }
+        $m = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
+
+        $failed = $false
+        try {
+            $m.ExitJson()
+        } catch [System.Management.Automation.RuntimeException] {
+            $failed = $true
+            $_.Exception.Message | Assert-Equals -Expected "exit: 0"
+            $actual = [Ansible.Basic.AnsibleModule]::FromJson($_.Exception.InnerException.Output)
+        }
+        $failed | Assert-Equals -Expected $true
+
+        $actual.changed | Assert-Equals -Expected $false
+        $actual.deprecations.Count | Assert-Equals -Expected 5
+        foreach ($dep in $actual.deprecations) {
+            $dep.msg -like "Alias 'alias?' is deprecated. See the module docs for more information" | Assert-Equals -Expected $true
+            $dep.version | Assert-Equals -Expected '2.0'
+        }
+        $actual.invocation | Assert-DictionaryEquals -Expected @{
+            module_args = @{
+                alias1 = "option1"
+                option1 = "option1"
+                alias2 = "option2"
+                option2 = "option2"
+                alias3 = "option3"
+                option3 = "option3"
+                alias4 = "option4"
+                option4 = "option4"
+                alias5 = "option5"
+                option5 = "option5"
+            }
+        }
+    }
 }
 
 try {
@@ -2566,4 +3025,3 @@ try {
 }
 
 Exit-Module
-

@@ -221,45 +221,45 @@ author:
 '''
 
 EXAMPLES = '''
-- name: install the latest version of Apache
+- name: Install the latest version of Apache
   dnf:
     name: httpd
     state: latest
 
-- name: install the latest version of Apache and MariaDB
+- name: Install the latest version of Apache and MariaDB
   dnf:
     name:
       - httpd
       - mariadb-server
     state: latest
 
-- name: remove the Apache package
+- name: Remove the Apache package
   dnf:
     name: httpd
     state: absent
 
-- name: install the latest version of Apache from the testing repo
+- name: Install the latest version of Apache from the testing repo
   dnf:
     name: httpd
     enablerepo: testing
     state: present
 
-- name: upgrade all packages
+- name: Upgrade all packages
   dnf:
     name: "*"
     state: latest
 
-- name: install the nginx rpm from a remote repo
+- name: Install the nginx rpm from a remote repo
   dnf:
     name: 'http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm'
     state: present
 
-- name: install nginx rpm from a local file
+- name: Install nginx rpm from a local file
   dnf:
     name: /usr/local/src/nginx-release-centos-6-0.el6.ngx.noarch.rpm
     state: present
 
-- name: install the 'Development tools' package group
+- name: Install the 'Development tools' package group
   dnf:
     name: '@Development tools'
     state: present
@@ -274,17 +274,17 @@ EXAMPLES = '''
     state: absent
     autoremove: no
 
-- name: install a modularity appstream with defined stream and profile
+- name: Install a modularity appstream with defined stream and profile
   dnf:
     name: '@postgresql:9.6/client'
     state: present
 
-- name: install a modularity appstream with defined stream
+- name: Install a modularity appstream with defined stream
   dnf:
     name: '@postgresql:9.6'
     state: present
 
-- name: install a modularity appstream with defined profile
+- name: Install a modularity appstream with defined profile
   dnf:
     name: '@postgresql/client'
     state: present
@@ -609,6 +609,12 @@ class DnfModule(YumDnf):
         """Return a fully configured dnf Base object."""
         base = dnf.Base()
         self._configure_base(base, conf_file, disable_gpg_check, installroot)
+        try:
+            # this method has been supported in dnf-4.2.17-6 or later
+            # https://bugzilla.redhat.com/show_bug.cgi?id=1788212
+            base.setup_loggers()
+        except AttributeError:
+            pass
         try:
             base.init_plugins(set(self.disable_plugin), set(self.enable_plugin))
             base.pre_configure_plugins()

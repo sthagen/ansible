@@ -96,39 +96,39 @@ EXAMPLES = '''
     state: started
     name: httpd
 
-- name: stop service cron on debian, if running
+- name: Stop service cron on debian, if running
   systemd:
     name: cron
     state: stopped
 
-- name: restart service cron on centos, in all cases, also issue daemon-reload to pick up config changes
+- name: Restart service cron on centos, in all cases, also issue daemon-reload to pick up config changes
   systemd:
     state: restarted
     daemon_reload: yes
     name: crond
 
-- name: reload service httpd, in all cases
+- name: Reload service httpd, in all cases
   systemd:
     name: httpd
     state: reloaded
 
-- name: enable service httpd and ensure it is not masked
+- name: Enable service httpd and ensure it is not masked
   systemd:
     name: httpd
     enabled: yes
     masked: no
 
-- name: enable a timer for dnf-automatic
+- name: Enable a timer for dnf-automatic
   systemd:
     name: dnf-automatic.timer
     state: started
     enabled: yes
 
-- name: just force systemd to reread configs (2.4 and above)
+- name: Just force systemd to reread configs (2.4 and above)
   systemd:
     daemon_reload: yes
 
-- name: just force systemd to re-execute itself (2.8 and above)
+- name: Just force systemd to re-execute itself (2.8 and above)
   systemd:
     daemon_reexec: yes
 '''
@@ -360,7 +360,7 @@ def main():
     ''' Set CLI options depending on params '''
     if module.params['user'] is not None:
         # handle user deprecation, mutually exclusive with scope
-        module.deprecate("The 'user' option is being replaced by 'scope'", version='2.11')
+        module.deprecate("The 'user' option is being replaced by 'scope'", version='ansible.builtin:2.11')
         if module.params['user']:
             module.params['scope'] = 'user'
         else:

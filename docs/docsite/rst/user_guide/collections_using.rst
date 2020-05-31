@@ -33,6 +33,11 @@ Installing an older version of a collection
 
 .. include:: ../shared_snippets/installing_older_collection.txt
 
+Installing a collection from a git repository
+---------------------------------------------
+
+.. include:: ../shared_snippets/installing_collections_git_repo.txt
+
 .. _collection_requirements_file:
 
 Install multiple collections with a requirements file
@@ -292,7 +297,8 @@ In a playbook, you can control the collections Ansible searches for modules and 
 
      - hosts: all
        collections:
-        - my_namespace.my_collection
+         - my_namespace.my_collection
+
        tasks:
          - import_role:
              name: role1

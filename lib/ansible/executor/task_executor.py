@@ -487,7 +487,7 @@ class TaskExecutor:
                                 'Invoking "%s" only once while using a loop via squash_actions is deprecated. '
                                 'Instead of using a loop to supply multiple items and specifying `%s: "%s"`, '
                                 'please use `%s: %s` and remove the loop' % (self._task.action, found, name, found, value_text),
-                                version='2.11'
+                                version='ansible.builtin:2.11'
                             )
                             for item in items:
                                 variables[loop_var] = item
@@ -562,9 +562,12 @@ class TaskExecutor:
             if not self._task.evaluate_conditional(templar, variables):
                 display.debug("when evaluation is False, skipping this task")
                 return dict(changed=False, skipped=True, skip_reason='Conditional result was False', _ansible_no_log=self._play_context.no_log)
-        except AnsibleError:
+        except AnsibleError as e:
             # loop error takes precedence
             if self._loop_eval_error is not None:
+                # Display the error from the conditional as well to prevent
+                # losing information useful for debugging.
+                display.v(to_text(e))
                 raise self._loop_eval_error  # pylint: disable=raising-bad-type
             raise
 
@@ -1009,6 +1012,13 @@ class TaskExecutor:
                     options['_extras'][k] = templar.template(variables[k])
 
         task_keys = self._task.dump_attrs()
+
+        if self._play_context.password:
+            # The connection password is threaded through the play_context for
+            # now. This is something we ultimately want to avoid, but the first
+            # step is to get connection plugins pulling the password through the
+            # config system instead of directly accessing play_context.
+            task_keys['password'] = self._play_context.password
 
         # set options with 'templated vars' specific to this plugin and dependent ones
         self._connection.set_options(task_keys=task_keys, var_options=options)
