@@ -8,9 +8,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['stableinterface'],
-                    'supported_by': 'core'}
 
 DOCUMENTATION = r'''
 ---
@@ -398,6 +395,8 @@ def chown_recursive(path, module):
 
 
 def copy_diff_files(src, dest, module):
+    """Copy files that are different between `src` directory and `dest` directory."""
+
     changed = False
     owner = module.params['owner']
     group = module.params['group']
@@ -416,6 +415,7 @@ def copy_diff_files(src, dest, module):
                 os.symlink(linkto, b_dest_item_path)
             else:
                 shutil.copyfile(b_src_item_path, b_dest_item_path)
+                shutil.copymode(b_src_item_path, b_dest_item_path)
 
             if owner is not None:
                 module.set_owner_if_different(b_dest_item_path, owner, False)
@@ -426,6 +426,8 @@ def copy_diff_files(src, dest, module):
 
 
 def copy_left_only(src, dest, module):
+    """Copy files that exist in `src` directory only to the `dest` directory."""
+
     changed = False
     owner = module.params['owner']
     group = module.params['group']
@@ -461,6 +463,8 @@ def copy_left_only(src, dest, module):
 
             if not os.path.islink(b_src_item_path) and os.path.isfile(b_src_item_path):
                 shutil.copyfile(b_src_item_path, b_dest_item_path)
+                shutil.copymode(b_src_item_path, b_dest_item_path)
+
                 if owner is not None:
                     module.set_owner_if_different(b_dest_item_path, owner, False)
                 if group is not None:
@@ -517,7 +521,8 @@ def main():
     )
 
     if module.params.get('thirsty'):
-        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead', version='ansible.builtin:2.13')
+        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead',
+                         version='2.13', collection_name='ansible.builtin')
 
     src = module.params['src']
     b_src = to_bytes(src, errors='surrogate_or_strict')
@@ -720,6 +725,7 @@ def main():
     else:
         changed = False
 
+    # If neither have checksums, both src and dest are directories.
     if checksum_src is None and checksum_dest is None:
         if remote_src and os.path.isdir(module.params['src']):
             b_src = to_bytes(module.params['src'], errors='surrogate_or_strict')

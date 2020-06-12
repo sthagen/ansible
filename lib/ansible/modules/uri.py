@@ -8,10 +8,6 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['stableinterface'],
-                    'supported_by': 'core'}
-
 DOCUMENTATION = r'''
 ---
 module: uri
@@ -75,7 +71,7 @@ options:
   return_content:
     description:
       - Whether or not to return the body of the response as a "content" key in
-        the dictionary result.
+        the dictionary result no matter it succeeded or failed.
       - Independently of this option, if the reported Content-type is "application/json", then the JSON is
         always loaded into a key called C(json) in the dictionary results.
     type: bool
@@ -615,7 +611,8 @@ def main():
     )
 
     if module.params.get('thirsty'):
-        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead', version='ansible.builtin:2.13')
+        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead',
+                         version='2.13', collection_name='ansible.builtin')
 
     url = module.params['url']
     body = module.params['body']
@@ -739,7 +736,10 @@ def main():
 
     if resp['status'] not in status_code:
         uresp['msg'] = 'Status code was %s and not %s: %s' % (resp['status'], status_code, uresp.get('msg', ''))
-        module.fail_json(content=u_content, **uresp)
+        if return_content:
+            module.fail_json(content=u_content, **uresp)
+        else:
+            module.fail_json(**uresp)
     elif return_content:
         module.exit_json(content=u_content, **uresp)
     else:

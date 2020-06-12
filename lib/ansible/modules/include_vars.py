@@ -6,11 +6,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['stableinterface'],
-    'supported_by': 'core'
-}
 
 DOCUMENTATION = r'''
 ---
@@ -100,12 +95,15 @@ EXAMPLES = r'''
   when: x == 0
 
 - name: Load a variable file based on the OS type, or a default if not found. Using free-form to specify the file.
-  include_vars: "{{ lookup('first_found', possible_files) }}"
+  include_vars: "{{ lookup('first_found', params) }}"
   vars:
-    possible_files:
-      - "{{ ansible_distribution }}.yaml"
-      - "{{ ansible_os_family }}.yaml"
-      - default.yaml
+    params:
+      files:
+        - '{{ansible_distribution}}.yaml'
+        - '{{ansible_os_family}}.yaml'
+        - default.yaml
+      paths:
+        - 'vars'
 
 - name: Bare include (free-form)
   include_vars: myvars.yaml

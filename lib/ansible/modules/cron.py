@@ -11,9 +11,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'core'}
 
 DOCUMENTATION = r'''
 ---
@@ -621,12 +618,12 @@ def main():
     if not name:
         module.deprecate(
             msg="The 'name' parameter will be required in future releases.",
-            version='ansible.builtin:2.12'
+            version='2.12', collection_name='ansible.builtin'
         )
     if reboot:
         module.deprecate(
             msg="The 'reboot' parameter will be removed in future releases. Use 'special_time' option instead.",
-            version='ansible.builtin:2.12'
+            version='2.12', collection_name='ansible.builtin'
         )
 
     if module._diff:

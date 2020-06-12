@@ -7,9 +7,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['stableinterface'],
-                    'supported_by': 'core'}
 
 DOCUMENTATION = r'''
 ---
@@ -449,10 +446,12 @@ def main():
     )
 
     if module.params.get('thirsty'):
-        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead', version='ansible.builtin:2.13')
+        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead',
+                         version='2.13', collection_name='ansible.builtin')
 
     if module.params.get('sha256sum'):
-        module.deprecate('The parameter "sha256sum" has been deprecated and will be removed, use "checksum" instead', version='ansible.builtin:2.14')
+        module.deprecate('The parameter "sha256sum" has been deprecated and will be removed, use "checksum" instead',
+                         version='2.14', collection_name='ansible.builtin')
 
     url = module.params['url']
     dest = module.params['dest']

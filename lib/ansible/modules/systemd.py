@@ -7,9 +7,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['stableinterface'],
-                    'supported_by': 'core'}
 
 DOCUMENTATION = '''
 module: systemd
@@ -360,7 +357,7 @@ def main():
     ''' Set CLI options depending on params '''
     if module.params['user'] is not None:
         # handle user deprecation, mutually exclusive with scope
-        module.deprecate("The 'user' option is being replaced by 'scope'", version='ansible.builtin:2.11')
+        module.deprecate("The 'user' option is being replaced by 'scope'", version='2.11', collection_name='ansible.builtin')
         if module.params['user']:
             module.params['scope'] = 'user'
         else:

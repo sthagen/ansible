@@ -18,7 +18,7 @@ import time
 from abc import ABCMeta, abstractmethod
 
 from ansible import constants as C
-from ansible.errors import AnsibleError, AnsibleConnectionFailure, AnsibleActionSkip, AnsibleActionFail
+from ansible.errors import AnsibleError, AnsibleConnectionFailure, AnsibleActionSkip, AnsibleActionFail, AnsiblePluginRemovedError
 from ansible.executor.module_common import modify_module
 from ansible.executor.interpreter_discovery import discover_interpreter, InterpreterDiscoveryRequiredError
 from ansible.module_utils.common._collections_compat import Sequence
@@ -191,7 +191,16 @@ class ActionBase(with_metaclass(ABCMeta, object)):
                         if key in module_args:
                             module_args[key] = self._connection._shell._unquote(module_args[key])
 
-            module_path = self._shared_loader_obj.module_loader.find_plugin(module_name, mod_type, collection_list=self._task.collections)
+            result = self._shared_loader_obj.module_loader.find_plugin_with_context(module_name, mod_type, collection_list=self._task.collections)
+
+            if not result.resolved:
+                if result.redirect_list and len(result.redirect_list) > 1:
+                    # take the last one in the redirect list, we may have successfully jumped through N other redirects
+                    target_module_name = result.redirect_list[-1]
+
+                    raise AnsibleError("The module {0} was redirected to {1}, which could not be loaded.".format(module_name, target_module_name))
+
+            module_path = result.plugin_resolved_path
             if module_path:
                 break
         else:  # This is a for-else: http://bit.ly/1ElPkyg
@@ -243,6 +252,11 @@ class ActionBase(with_metaclass(ABCMeta, object)):
                     task_vars['ansible_facts'][discovered_key] = self._discovered_interpreter
                     # preserve this so _execute_module can propagate back to controller as a fact
                     self._discovered_interpreter_key = discovered_key
+                else:
+                    task_vars['ansible_delegated_vars'][self._task.delegate_to]
+                    if task_vars['ansible_delegated_vars'][self._task.delegate_to].get('ansible_facts') is None:
+                        task_vars['ansible_delegated_vars'][self._task.delegate_to]['ansible_facts'] = {}
+                    task_vars['ansible_delegated_vars'][self._task.delegate_to]['ansible_facts'][discovered_key] = self._discovered_interpreter
 
         return (module_style, module_shebang, module_data, module_path)
 
@@ -291,20 +305,30 @@ class ActionBase(with_metaclass(ABCMeta, object)):
         Determines if we are required and can do pipelining
         '''
 
-        # any of these require a true
-        for condition in [
-            self._connection.has_pipelining,
-            self._play_context.pipelining or self._connection.always_pipeline_modules,  # pipelining enabled for play or connection requires it (eg winrm)
-            module_style == "new",                     # old style modules do not support pipelining
-            not C.DEFAULT_KEEP_REMOTE_FILES,           # user wants remote files
-            not wrap_async or self._connection.always_pipeline_modules,  # async does not normally support pipelining unless it does (eg winrm)
-            (self._connection.become.name if self._connection.become else '') != 'su',  # su does not work with pipelining,
-            # FIXME: we might need to make become_method exclusion a configurable list
-        ]:
-            if not condition:
-                return False
+        try:
+            is_enabled = self._connection.get_option('pipelining')
+        except (KeyError, AttributeError, ValueError):
+            is_enabled = self._play_context.pipelining
 
-        return True
+        # winrm supports async pipeline
+        # TODO: make other class property 'has_async_pipelining' to separate cases
+        always_pipeline = self._connection.always_pipeline_modules
+
+        # su does not work with pipelining
+        # TODO: add has_pipelining class prop to become plugins
+        become_exception = (self._connection.become.name if self._connection.become else '') != 'su'
+
+        # any of these require a true
+        conditions = [
+            self._connection.has_pipelining,    # connection class supports it
+            is_enabled or always_pipeline,      # enabled via config or forced via connection (eg winrm)
+            module_style == "new",              # old style modules do not support pipelining
+            not C.DEFAULT_KEEP_REMOTE_FILES,    # user wants remote files
+            not wrap_async or always_pipeline,  # async does not normally support pipelining unless it does (eg winrm)
+            become_exception,
+        ]
+
+        return all(conditions)
 
     def _get_admin_users(self):
         '''
@@ -822,7 +846,7 @@ class ActionBase(with_metaclass(ABCMeta, object)):
                 msg = "Setting the async dir from the environment keyword " \
                       "ANSIBLE_ASYNC_DIR is deprecated. Set the async_dir " \
                       "shell option instead"
-                self._display.deprecated(msg, "ansible.builtin:2.12")
+                self._display.deprecated(msg, "2.12", collection_name='ansible.builtin')
             else:
                 # ANSIBLE_ASYNC_DIR is not set on the task, we get the value
                 # from the shell option and temporarily add to the environment

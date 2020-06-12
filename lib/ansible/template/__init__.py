@@ -42,10 +42,11 @@ from jinja2.loaders import FileSystemLoader
 from jinja2.runtime import Context, StrictUndefined
 
 from ansible import constants as C
-from ansible.errors import AnsibleError, AnsibleFilterError, AnsibleUndefinedVariable, AnsibleAssertionError
+from ansible.errors import AnsibleError, AnsibleFilterError, AnsiblePluginRemovedError, AnsibleUndefinedVariable, AnsibleAssertionError
 from ansible.module_utils.six import iteritems, string_types, text_type
+from ansible.module_utils.six.moves import range
 from ansible.module_utils._text import to_native, to_text, to_bytes
-from ansible.module_utils.common._collections_compat import Sequence, Mapping, MutableMapping
+from ansible.module_utils.common._collections_compat import Iterator, Sequence, Mapping, MappingView, MutableMapping
 from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils.compat.importlib import import_module
 from ansible.plugins.loader import filter_loader, lookup_loader, test_loader
@@ -92,6 +93,9 @@ else:
 
 JINJA2_BEGIN_TOKENS = frozenset(('variable_begin', 'block_begin', 'comment_begin', 'raw_begin'))
 JINJA2_END_TOKENS = frozenset(('variable_end', 'block_end', 'comment_end', 'raw_end'))
+
+
+RANGE_TYPE = type(range(0))
 
 
 def generate_ansible_template_vars(path, dest_path=None):
@@ -230,6 +234,43 @@ def recursive_check_defined(item):
             raise AnsibleFilterError("{0} is undefined".format(item))
 
 
+def _is_rolled(value):
+    """Helper method to determine if something is an unrolled generator,
+    iterator, or similar object
+    """
+    return (
+        isinstance(value, Iterator) or
+        isinstance(value, MappingView) or
+        isinstance(value, RANGE_TYPE)
+    )
+
+
+def _unroll_iterator(func):
+    """Wrapper function, that intercepts the result of a filter
+    and auto unrolls a generator, so that users are not required to
+    explicitly use ``|list`` to unroll.
+    """
+    def wrapper(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        if _is_rolled(ret):
+            return list(ret)
+        return ret
+
+    # This code is duplicated from ``functools.update_wrapper`` from Py3.7.
+    # ``functools.update_wrapper`` was failing when the func was ``functools.partial``
+    for attr in ('__module__', '__name__', '__qualname__', '__doc__', '__annotations__'):
+        try:
+            value = getattr(func, attr)
+        except AttributeError:
+            pass
+        else:
+            setattr(wrapper, attr, value)
+    for attr in ('__dict__',):
+        getattr(wrapper, attr).update(getattr(func, attr, {}))
+    wrapper.__wrapped__ = func
+    return wrapper
+
+
 class AnsibleUndefined(StrictUndefined):
     '''
     A custom Undefined class, which returns further Undefined objects on access,
@@ -364,26 +405,61 @@ class JinjaPluginIntercept(MutableMapping):
                 if func:
                     return func
 
-                ts = _get_collection_metadata('ansible.builtin')
-
-                # TODO: implement support for collection-backed redirect (currently only builtin)
-                # TODO: implement cycle detection (unified across collection redir as well)
-                redirect_fqcr = ts.get('plugin_routing', {}).get(self._dirname, {}).get(key, {}).get('redirect', None)
-                if redirect_fqcr:
-                    acr = AnsibleCollectionRef.from_fqcr(ref=redirect_fqcr, ref_type=self._dirname)
-                    display.vvv('redirecting {0} {1} to {2}.{3}'.format(self._dirname, key, acr.collection, acr.resource))
-                    key = redirect_fqcr
-                # TODO: handle recursive forwarding (not necessary for builtin, but definitely for further collection redirs)
-
-            func = self._collection_jinja_func_cache.get(key)
-
-            if func:
-                return func
+                # didn't find it in the pre-built Jinja env, assume it's a former builtin and follow the normal routing path
+                leaf_key = key
+                key = 'ansible.builtin.' + key
+            else:
+                leaf_key = key.split('.')[-1]
 
             acr = AnsibleCollectionRef.try_parse_fqcr(key, self._dirname)
 
             if not acr:
                 raise KeyError('invalid plugin name: {0}'.format(key))
+
+            ts = _get_collection_metadata(acr.collection)
+
+            # TODO: implement support for collection-backed redirect (currently only builtin)
+            # TODO: implement cycle detection (unified across collection redir as well)
+
+            routing_entry = ts.get('plugin_routing', {}).get(self._dirname, {}).get(leaf_key, {})
+
+            deprecation_entry = routing_entry.get('deprecation')
+            if deprecation_entry:
+                warning_text = deprecation_entry.get('warning_text')
+                removal_date = deprecation_entry.get('removal_date')
+                removal_version = deprecation_entry.get('removal_version')
+
+                if not warning_text:
+                    warning_text = '{0} "{1}" is deprecated'.format(self._dirname, key)
+
+                display.deprecated(warning_text, version=removal_version, date=removal_date, collection_name=acr.collection)
+
+            tombstone_entry = routing_entry.get('tombstone')
+
+            if tombstone_entry:
+                warning_text = tombstone_entry.get('warning_text')
+                removal_date = tombstone_entry.get('removal_date')
+                removal_version = tombstone_entry.get('removal_version')
+
+                if not warning_text:
+                    warning_text = '{0} "{1}" has been removed'.format(self._dirname, key)
+
+                exc_msg = display.get_deprecation_message(warning_text, version=removal_version, date=removal_date,
+                                                          collection_name=acr.collection, removed=True)
+
+                raise AnsiblePluginRemovedError(exc_msg)
+
+            redirect_fqcr = routing_entry.get('redirect', None)
+            if redirect_fqcr:
+                acr = AnsibleCollectionRef.from_fqcr(ref=redirect_fqcr, ref_type=self._dirname)
+                display.vvv('redirecting {0} {1} to {2}.{3}'.format(self._dirname, key, acr.collection, acr.resource))
+                key = redirect_fqcr
+            # TODO: handle recursive forwarding (not necessary for builtin, but definitely for further collection redirs)
+
+            func = self._collection_jinja_func_cache.get(key)
+
+            if func:
+                return func
 
             try:
                 pkg = import_module(acr.n_python_package_name)
@@ -411,16 +487,18 @@ class JinjaPluginIntercept(MutableMapping):
                 for f in iteritems(method_map()):
                     fq_name = '.'.join((parent_prefix, f[0]))
                     # FIXME: detect/warn on intra-collection function name collisions
-                    self._collection_jinja_func_cache[fq_name] = f[1]
+                    self._collection_jinja_func_cache[fq_name] = _unroll_iterator(f[1])
 
             function_impl = self._collection_jinja_func_cache[key]
             return function_impl
+        except AnsiblePluginRemovedError as apre:
+            raise TemplateSyntaxError(to_native(apre), 0)
         except KeyError:
             raise
         except Exception as ex:
             display.warning('an unexpected error occurred during Jinja2 environment setup: {0}'.format(to_native(ex)))
             display.vvv('exception during Jinja2 environment setup: {0}'.format(format_exc()))
-            raise
+            raise TemplateSyntaxError(to_native(ex), 0)
 
     def __setitem__(self, key, value):
         return self._delegatee.__setitem__(key, value)
@@ -493,6 +571,15 @@ class Templar:
             finalize=self._finalize,
             loader=FileSystemLoader(self._basedir),
         )
+
+        # jinja2 global is inconsistent across versions, this normalizes them
+        self.environment.globals['dict'] = dict
+
+        # Custom globals
+        self.environment.globals['lookup'] = self._lookup
+        self.environment.globals['query'] = self.environment.globals['q'] = self._query_lookup
+        self.environment.globals['now'] = self._now_datetime
+        self.environment.globals['finalize'] = self._finalize
 
         # the current rendering context under which the templar class is working
         self.cur_context = None
@@ -574,7 +661,7 @@ class Templar:
     def set_available_variables(self, variables):
         display.deprecated(
             'set_available_variables is being deprecated. Use "@available_variables.setter" instead.',
-            version='ansible.builtin:2.13'
+            version='2.13', collection_name='ansible.builtin'
         )
         self.available_variables = variables
 
@@ -784,8 +871,18 @@ class Templar:
 
         If using ANSIBLE_JINJA2_NATIVE we bypass this and return the actual value always
         '''
+        if _is_rolled(thing):
+            # Auto unroll a generator, so that users are not required to
+            # explicitly use ``|list`` to unroll
+            # This only affects the scenario where the final result of templating
+            # is a generator, and not where a filter creates a generator in the middle
+            # of a template. See ``_unroll_iterator`` for the other case. This is probably
+            # unncessary
+            return list(thing)
+
         if USE_JINJA2_NATIVE:
             return thing
+
         return thing if thing is not None else ''
 
     def _fail_lookup(self, name, *args, **kwargs):
@@ -891,6 +988,8 @@ class Templar:
 
             # Adds Ansible custom filters and tests
             myenv.filters.update(self._get_filters())
+            for k in myenv.filters:
+                myenv.filters[k] = _unroll_iterator(myenv.filters[k])
             myenv.tests.update(self._get_tests())
 
             if escape_backslashes:
@@ -907,18 +1006,8 @@ class Templar:
                 else:
                     return data
 
-            # jinja2 global is inconsistent across versions, this normalizes them
-            t.globals['dict'] = dict
-
             if disable_lookups:
                 t.globals['query'] = t.globals['q'] = t.globals['lookup'] = self._fail_lookup
-            else:
-                t.globals['lookup'] = self._lookup
-                t.globals['query'] = t.globals['q'] = self._query_lookup
-
-            t.globals['now'] = self._now_datetime
-
-            t.globals['finalize'] = self._finalize
 
             jvars = AnsibleJ2Vars(self, t.globals)
 
