@@ -93,6 +93,16 @@ OS_CALL_REGEX = re.compile(r'os\.call.*')
 LOOSE_ANSIBLE_VERSION = LooseVersion('.'.join(ansible_version.split('.')[:3]))
 
 
+def compare_dates(d1, d2):
+    try:
+        date1 = parse_isodate(d1, allow_date=True)
+        date2 = parse_isodate(d2, allow_date=True)
+        return date1 == date2
+    except ValueError:
+        # At least one of d1 and d2 cannot be parsed. Simply compare values.
+        return d1 == d2
+
+
 class ReporterEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Exception):
@@ -1126,7 +1136,7 @@ class ModuleValidator(Validator):
                 # to make comparison possible and to avoid confusing the user.
                 documentation_date = doc_deprecation.get('removed_at_date')
                 documentation_version = doc_deprecation.get('removed_in')
-                if routing_date != documentation_date:
+                if not compare_dates(routing_date, documentation_date):
                     self.reporter.error(
                         path=self.object_path,
                         code='deprecation-mismatch',
@@ -1482,7 +1492,7 @@ class ModuleValidator(Validator):
             removed_at_date = data.get('removed_at_date', None)
             if removed_at_date is not None:
                 try:
-                    if parse_isodate(removed_at_date) < datetime.date.today():
+                    if parse_isodate(removed_at_date, allow_date=False) < datetime.date.today():
                         msg = "Argument '%s' in argument_spec" % arg
                         if context:
                             msg += " found in %s" % " -> ".join(context)
@@ -1503,7 +1513,7 @@ class ModuleValidator(Validator):
                     if 'name' in deprecated_alias and 'date' in deprecated_alias:
                         try:
                             date = deprecated_alias['date']
-                            if parse_isodate(date) < datetime.date.today():
+                            if parse_isodate(date, allow_date=False) < datetime.date.today():
                                 msg = "Argument '%s' in argument_spec" % arg
                                 if context:
                                     msg += " found in %s" % " -> ".join(context)
@@ -2174,7 +2184,7 @@ class ModuleValidator(Validator):
                 if 'removed_at_date' in docs['deprecated']:
                     try:
                         removed_at_date = docs['deprecated']['removed_at_date']
-                        if parse_isodate(removed_at_date) < datetime.date.today():
+                        if parse_isodate(removed_at_date, allow_date=True) < datetime.date.today():
                             msg = "Module's deprecated.removed_at_date date '%s' is before today" % removed_at_date
                             self.reporter.error(path=self.object_path, code='deprecated-date', msg=msg)
                     except ValueError:
