@@ -206,7 +206,16 @@ EXAMPLES = r'''
 
 '''
 RETURN = r'''
-
+dest:
+    description: Destination file/path, equal to the value passed to I(path)
+    returned: state=touch, state=hard, state=link
+    type: str
+    sample: /path/to/file.txt
+path:
+    description: Destination file/path, equal to the value passed to I(path)
+    returned: state=absent, state=directory, state=file
+    type: str
+    sample: /path/to/file.txt
 '''
 
 import errno
@@ -549,7 +558,7 @@ def execute_touch(path, follow, timestamps):
             changed = module.set_fs_attributes_if_different(file_args, changed, diff, expand=False)
             changed |= update_timestamp_for_file(file_args['path'], mtime, atime, diff)
         except SystemExit as e:
-            if e.code:
+            if e.code:  # this is the exit code passed to sys.exit, not a constant -- pylint: disable=using-constant-test
                 # We take this to mean that fail_json() was called from
                 # somewhere in basic.py
                 if prev_state == 'absent':
@@ -608,7 +617,7 @@ def ensure_directory(path, follow, recurse, timestamps):
     if prev_state == 'absent':
         # Create directory and assign permissions to it
         if module.check_mode:
-            return {'changed': True, 'diff': diff}
+            return {'path': path, 'changed': True, 'diff': diff}
         curpath = ''
 
         try:
