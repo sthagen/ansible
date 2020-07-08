@@ -108,7 +108,7 @@ files:
     - digital_ocean
     maintainers: $team_digital_ocean
     support: community
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   $modules/cloud/dimensiondata/dimensiondata_network.py:
     maintainers: tintoy
     migrated_to: community.general
@@ -848,7 +848,8 @@ files:
     maintainers: $team_postgresql
     notified: jbscalia
     migrated_to: community.general
-  $modules/database/proxysql/: *id004
+  $modules/database/proxysql/:
+    migrated_to: community.proxysql
   $modules/database/vertica/: dareko
   $modules/files/acl.py:
     ignored: astorije
@@ -3998,7 +3999,8 @@ files:
     maintainers: $team_openstack
     migrated_to: openstack.cloud
   $plugins/doc_fragments/postgres.py: *id028
-  $plugins/doc_fragments/proxysql.py: *id004
+  $plugins/doc_fragments/proxysql.py:
+    migrated_to: community.proxysql
   $plugins/doc_fragments/ucs.py: *id031
   $plugins/doc_fragments/vultr.py: *id035
   $plugins/doc_fragments/ovirt.py:
@@ -7122,7 +7124,7 @@ files:
   lib/ansible/plugins/doc_fragments/cnos.py:
     migrated_to: community.general
   lib/ansible/plugins/doc_fragments/digital_ocean.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/plugins/doc_fragments/dimensiondata.py:
     migrated_to: community.general
   lib/ansible/plugins/doc_fragments/dimensiondata_wait.py:
@@ -7302,7 +7304,7 @@ files:
   contrib/inventory/consul_io.py:
     migrated_to: community.general
   contrib/inventory/digital_ocean.ini:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   contrib/inventory/docker.py:
     migrated_to: community.general
   contrib/inventory/docker.yml:
@@ -7456,7 +7458,7 @@ files:
   lib/ansible/module_utils/database.py:
     migrated_to: community.general
   lib/ansible/module_utils/digital_ocean.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/module_utils/dimensiondata.py:
     migrated_to: community.general
   lib/ansible/module_utils/docker/__init__.py:
@@ -7928,73 +7930,73 @@ files:
   lib/ansible/modules/cloud/cloudstack/cs_zone_info.py:
     migrated_to: ngine_io.cloudstack
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_account_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_certificate_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_domain_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_firewall_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_floating_ip_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_image_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_load_balancer_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_region_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_size_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_snapshot_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_sshkey_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_tag_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/_digital_ocean_volume_facts.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_account_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_block_storage.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_certificate.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_certificate_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_domain.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_domain_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_droplet.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_firewall_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_floating_ip.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_floating_ip_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_image_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_load_balancer_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_region_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_size_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_snapshot_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_sshkey.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_sshkey_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_tag.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_tag_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/digital_ocean/digital_ocean_volume_info.py:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   lib/ansible/modules/cloud/dimensiondata/dimensiondata_vlan.py:
     migrated_to: community.general
   lib/ansible/modules/cloud/docker/_docker_image_facts.py:
@@ -8700,19 +8702,19 @@ files:
   lib/ansible/modules/database/postgresql/postgresql_user_obj_stat_info.py:
     migrated_to: community.general
   lib/ansible/modules/database/proxysql/proxysql_backend_servers.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_global_variables.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_manage_config.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_mysql_users.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_query_rules.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_replication_hostgroups.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/proxysql/proxysql_scheduler.py:
-    migrated_to: community.general
+    migrated_to: community.proxysql
   lib/ansible/modules/database/vertica/_vertica_facts.py:
     migrated_to: community.general
   lib/ansible/modules/database/vertica/vertica_configuration.py:
@@ -12586,9 +12588,9 @@ files:
   test/integration/targets/connection_lxd/test_connection.inventory:
     migrated_to: community.general
   test/integration/targets/digital_ocean_tag/aliases:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/digital_ocean_tag/tasks/main.yml:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/filter_json_query/aliases:
     migrated_to: community.general
   test/integration/targets/filter_json_query/runme.yml:
@@ -13264,13 +13266,13 @@ files:
   test/integration/targets/cs_zone_info/meta/main.yml:
     migrated_to: ngine_io.cloudstack
   test/integration/targets/digital_ocean_floating_ip/aliases:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/digital_ocean_floating_ip/tasks/main.yml:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/digital_ocean_sshkey/aliases:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/digital_ocean_sshkey/tasks/main.yml:
-    migrated_to: community.general
+    migrated_to: community.digitalocean
   test/integration/targets/docker_config/aliases:
     migrated_to: community.general
   test/integration/targets/docker_config/tasks/test_docker_config.yml:
