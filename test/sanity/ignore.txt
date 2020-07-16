@@ -107,7 +107,6 @@ lib/ansible/modules/apt.py validate-modules:doc-default-does-not-match-spec
 lib/ansible/modules/apt.py validate-modules:parameter-invalid
 lib/ansible/modules/apt.py validate-modules:parameter-type-not-in-doc
 lib/ansible/modules/apt.py validate-modules:undocumented-parameter
-lib/ansible/modules/apt_key.py validate-modules:mutually_exclusive-unknown
 lib/ansible/modules/apt_key.py validate-modules:parameter-type-not-in-doc
 lib/ansible/modules/apt_key.py validate-modules:undocumented-parameter
 lib/ansible/modules/apt_repository.py validate-modules:doc-default-does-not-match-spec
@@ -204,6 +203,7 @@ test/integration/targets/incidental_win_dsc/files/xTestDsc/1.0.1/DSCResources/AN
 test/integration/targets/incidental_win_dsc/files/xTestDsc/1.0.1/xTestDsc.psd1 pslint!skip
 test/integration/targets/incidental_win_ping/library/win_ping_syntax_error.ps1 pslint!skip
 test/integration/targets/incidental_win_reboot/templates/post_reboot.ps1 pslint!skip
+test/integration/targets/lookup_csvfile/files/crlf.csv line-endings
 test/integration/targets/lookup_ini/lookup-8859-15.ini no-smart-quotes
 test/integration/targets/module_precedence/lib_with_extension/a.ini shebang
 test/integration/targets/module_precedence/lib_with_extension/ping.ini shebang

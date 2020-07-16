@@ -1602,7 +1602,7 @@ To format a date using a string (like with the shell date command), use the "str
     {{ '%Y-%m-%d' | strftime(0) }}          # => 1970-01-01
     {{ '%Y-%m-%d' | strftime(1441357287) }} # => 2015-09-04
 
-.. note:: To get all string possibilities, check https://docs.python.org/2/library/time.html#time.strftime
+.. note:: To get all string possibilities, check https://docs.python.org/3/library/time.html#time.strftime
 
 Getting Kubernetes resource names
 =================================
@@ -1652,7 +1652,7 @@ This can then be used to reference hashes in Pod specifications::
    :ref:`playbooks_reuse_roles`
        Playbook organization by roles
    :ref:`playbooks_best_practices`
-       Best practices in playbooks
+       Tips and tricks for playbooks
    `User Mailing List <https://groups.google.com/group/ansible-devel>`_
        Have a question?  Stop by the google group!
    `irc.freenode.net <http://irc.freenode.net>`_

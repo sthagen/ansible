@@ -1391,17 +1391,17 @@ plugin_routing:
     mssql_db:
       redirect: community.general.mssql_db
     mysql_db:
-      redirect: community.general.mysql_db
+      redirect: community.mysql.mysql_db
     mysql_info:
-      redirect: community.general.mysql_info
+      redirect: community.mysql.mysql_info
     mysql_query:
-      redirect: community.general.mysql_query
+      redirect: community.mysql.mysql_query
     mysql_replication:
-      redirect: community.general.mysql_replication
+      redirect: community.mysql.mysql_replication
     mysql_user:
-      redirect: community.general.mysql_user
+      redirect: community.mysql.mysql_user
     mysql_variables:
-      redirect: community.general.mysql_variables
+      redirect: community.mysql.mysql_variables
     postgresql_copy:
       redirect: community.general.postgresql_copy
     postgresql_db:
@@ -1899,23 +1899,23 @@ plugin_routing:
     bigmon_policy:
       redirect: community.network.bigmon_policy
     checkpoint_access_layer_facts:
-      redirect: checkpoint.mgmt.checkpoint_access_layer_facts
+      redirect: check_point.mgmt.checkpoint_access_layer_facts
     checkpoint_access_rule:
-      redirect: checkpoint.mgmt.checkpoint_access_rule
+      redirect: check_point.mgmt.checkpoint_access_rule
     checkpoint_access_rule_facts:
-      redirect: checkpoint.mgmt.checkpoint_access_rule_facts
+      redirect: check_point.mgmt.checkpoint_access_rule_facts
     checkpoint_host:
-      redirect: checkpoint.mgmt.checkpoint_host
+      redirect: check_point.mgmt.checkpoint_host
     checkpoint_host_facts:
-      redirect: checkpoint.mgmt.checkpoint_host_facts
+      redirect: check_point.mgmt.checkpoint_host_facts
     checkpoint_object_facts:
-      redirect: checkpoint.mgmt.checkpoint_object_facts
+      redirect: check_point.mgmt.checkpoint_object_facts
     checkpoint_run_script:
-      redirect: checkpoint.mgmt.checkpoint_run_script
+      redirect: check_point.mgmt.checkpoint_run_script
     checkpoint_session:
-      redirect: checkpoint.mgmt.checkpoint_session
+      redirect: check_point.mgmt.checkpoint_session
     checkpoint_task_facts:
-      redirect: checkpoint.mgmt.checkpoint_task_facts
+      redirect: check_point.mgmt.checkpoint_task_facts
     cp_publish:
       redirect: community.network.cp_publish
     ce_aaa_server:
@@ -2961,17 +2961,17 @@ plugin_routing:
     ibm_sa_vol_map:
       redirect: community.general.ibm_sa_vol_map
     infini_export:
-      redirect: community.general.infini_export
+      redirect: infinidat.infinibox.infini_export
     infini_export_client:
-      redirect: community.general.infini_export_client
+      redirect: infinidat.infinibox.infini_export_client
     infini_fs:
-      redirect: community.general.infini_fs
+      redirect: infinidat.infinibox.infini_fs
     infini_host:
-      redirect: community.general.infini_host
+      redirect: infinidat.infinibox.infini_host
     infini_pool:
-      redirect: community.general.infini_pool
+      redirect: infinidat.infinibox.infini_pool
     infini_vol:
-      redirect: community.general.infini_vol
+      redirect: infinidat.infinibox.infini_vol
     na_cdot_aggregate:
       redirect: community.general.na_cdot_aggregate
     na_cdot_license:
@@ -7630,7 +7630,7 @@ plugin_routing:
     identity.keycloak:
       redirect: community.general.identity.keycloak
     infinibox:
-      redirect: community.general.infinibox
+      redirect: infinidat.infinibox.infinibox
     influxdb:
       redirect: community.general.influxdb
     ipa:
@@ -7650,7 +7650,7 @@ plugin_routing:
     memset:
       redirect: community.general.memset
     mysql:
-      redirect: community.general.mysql
+      redirect: community.mysql.mysql
     api:
       redirect: skydive.skydive.api
     network.a10:
@@ -8345,7 +8345,7 @@ plugin_routing:
     ibm_storage:
       redirect: community.general.ibm_storage
     infinibox:
-      redirect: community.general.infinibox
+      redirect: infinidat.infinibox.infinibox
     influxdb:
       redirect: community.general.influxdb
     ingate:
@@ -8367,7 +8367,7 @@ plugin_routing:
     manageiq:
       redirect: community.general.manageiq
     mysql:
-      redirect: community.general.mysql
+      redirect: community.mysql.mysql
     netscaler:
       redirect: community.network.netscaler
     nios:
