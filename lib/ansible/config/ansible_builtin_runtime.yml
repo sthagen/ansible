@@ -643,73 +643,73 @@ plugin_routing:
     cs_zone_info:
       redirect: ngine_io.cloudstack.cs_zone_info
     digital_ocean:
-      redirect: community.general.digital_ocean
+      redirect: community.digitalocean.digital_ocean
     digital_ocean_account_facts:
-      redirect: community.general.digital_ocean_account_facts
+      redirect: community.digitalocean.digital_ocean_account_facts
     digital_ocean_certificate_facts:
-      redirect: community.general.digital_ocean_certificate_facts
+      redirect: community.digitalocean.digital_ocean_certificate_facts
     digital_ocean_domain_facts:
-      redirect: community.general.digital_ocean_domain_facts
+      redirect: community.digitalocean.digital_ocean_domain_facts
     digital_ocean_firewall_facts:
-      redirect: community.general.digital_ocean_firewall_facts
+      redirect: community.digitalocean.digital_ocean_firewall_facts
     digital_ocean_floating_ip_facts:
-      redirect: community.general.digital_ocean_floating_ip_facts
+      redirect: community.digitalocean.digital_ocean_floating_ip_facts
     digital_ocean_image_facts:
-      redirect: community.general.digital_ocean_image_facts
+      redirect: community.digitalocean.digital_ocean_image_facts
     digital_ocean_load_balancer_facts:
-      redirect: community.general.digital_ocean_load_balancer_facts
+      redirect: community.digitalocean.digital_ocean_load_balancer_facts
     digital_ocean_region_facts:
-      redirect: community.general.digital_ocean_region_facts
+      redirect: community.digitalocean.digital_ocean_region_facts
     digital_ocean_size_facts:
-      redirect: community.general.digital_ocean_size_facts
+      redirect: community.digitalocean.digital_ocean_size_facts
     digital_ocean_snapshot_facts:
-      redirect: community.general.digital_ocean_snapshot_facts
+      redirect: community.digitalocean.digital_ocean_snapshot_facts
     digital_ocean_sshkey_facts:
-      redirect: community.general.digital_ocean_sshkey_facts
+      redirect: community.digitalocean.digital_ocean_sshkey_facts
     digital_ocean_tag_facts:
-      redirect: community.general.digital_ocean_tag_facts
+      redirect: community.digitalocean.digital_ocean_tag_facts
     digital_ocean_volume_facts:
-      redirect: community.general.digital_ocean_volume_facts
+      redirect: community.digitalocean.digital_ocean_volume_facts
     digital_ocean_account_info:
-      redirect: community.general.digital_ocean_account_info
+      redirect: community.digitalocean.digital_ocean_account_info
     digital_ocean_block_storage:
-      redirect: community.general.digital_ocean_block_storage
+      redirect: community.digitalocean.digital_ocean_block_storage
     digital_ocean_certificate:
-      redirect: community.general.digital_ocean_certificate
+      redirect: community.digitalocean.digital_ocean_certificate
     digital_ocean_certificate_info:
-      redirect: community.general.digital_ocean_certificate_info
+      redirect: community.digitalocean.digital_ocean_certificate_info
     digital_ocean_domain:
-      redirect: community.general.digital_ocean_domain
+      redirect: community.digitalocean.digital_ocean_domain
     digital_ocean_domain_info:
-      redirect: community.general.digital_ocean_domain_info
+      redirect: community.digitalocean.digital_ocean_domain_info
     digital_ocean_droplet:
-      redirect: community.general.digital_ocean_droplet
+      redirect: community.digitalocean.digital_ocean_droplet
     digital_ocean_firewall_info:
-      redirect: community.general.digital_ocean_firewall_info
+      redirect: community.digitalocean.digital_ocean_firewall_info
     digital_ocean_floating_ip:
-      redirect: community.general.digital_ocean_floating_ip
+      redirect: community.digitalocean.digital_ocean_floating_ip
     digital_ocean_floating_ip_info:
-      redirect: community.general.digital_ocean_floating_ip_info
+      redirect: community.digitalocean.digital_ocean_floating_ip_info
     digital_ocean_image_info:
-      redirect: community.general.digital_ocean_image_info
+      redirect: community.digitalocean.digital_ocean_image_info
     digital_ocean_load_balancer_info:
-      redirect: community.general.digital_ocean_load_balancer_info
+      redirect: community.digitalocean.digital_ocean_load_balancer_info
     digital_ocean_region_info:
-      redirect: community.general.digital_ocean_region_info
+      redirect: community.digitalocean.digital_ocean_region_info
     digital_ocean_size_info:
-      redirect: community.general.digital_ocean_size_info
+      redirect: community.digitalocean.digital_ocean_size_info
     digital_ocean_snapshot_info:
-      redirect: community.general.digital_ocean_snapshot_info
+      redirect: community.digitalocean.digital_ocean_snapshot_info
     digital_ocean_sshkey:
-      redirect: community.general.digital_ocean_sshkey
+      redirect: community.digitalocean.digital_ocean_sshkey
     digital_ocean_sshkey_info:
-      redirect: community.general.digital_ocean_sshkey_info
+      redirect: community.digitalocean.digital_ocean_sshkey_info
     digital_ocean_tag:
-      redirect: community.general.digital_ocean_tag
+      redirect: community.digitalocean.digital_ocean_tag
     digital_ocean_tag_info:
-      redirect: community.general.digital_ocean_tag_info
+      redirect: community.digitalocean.digital_ocean_tag_info
     digital_ocean_volume_info:
-      redirect: community.general.digital_ocean_volume_info
+      redirect: community.digitalocean.digital_ocean_volume_info
     dimensiondata_network:
       redirect: community.general.dimensiondata_network
     dimensiondata_vlan:
@@ -767,7 +767,7 @@ plugin_routing:
     gce:
       redirect: community.general.gce
     gcp_backend_service:
-      redirect: google.cloud.gcp_backend_service
+      redirect: community.general.gcp_backend_service
     gcp_bigquery_dataset_facts:
       redirect: google.cloud.gcp_bigquery_dataset_info
     gcp_bigquery_table_facts:
@@ -847,9 +847,9 @@ plugin_routing:
     gcp_dns_resource_record_set_facts:
       redirect: google.cloud.gcp_dns_resource_record_set_info
     gcp_forwarding_rule:
-      redirect: google.cloud.gcp_forwarding_rule
+      redirect: community.general.gcp_forwarding_rule
     gcp_healthcheck:
-      redirect: google.cloud.gcp_healthcheck
+      redirect: community.general.gcp_healthcheck
     gcp_iam_role_facts:
       redirect: google.cloud.gcp_iam_role_info
     gcp_iam_service_account_facts:
@@ -907,9 +907,9 @@ plugin_routing:
     gce_tag:
       redirect: community.general.gce_tag
     gcpubsub:
-      redirect: google.cloud.gcpubsub
+      redirect: community.general.gcpubsub
     gcpubsub_info:
-      redirect: google.cloud.gcpubsub_info
+      redirect: community.general.gcpubsub_info
     heroku_collaborator:
       redirect: community.general.heroku_collaborator
     hwc_ecs_instance:
@@ -1035,7 +1035,7 @@ plugin_routing:
     os_flavor_facts:
       redirect: openstack.cloud.os_flavor_info
     os_image_facts:
-      redirect: openstack.cloud.os_image_facts
+      redirect: openstack.cloud.os_image_info
     os_keystone_domain_facts:
       redirect: openstack.cloud.os_keystone_domain_info
     os_networks_facts:
@@ -1745,9 +1745,9 @@ plugin_routing:
     aci_intf_policy_mcp:
       redirect: cisco.aci.aci_interface_policy_mcp
     aci_intf_policy_port_channel:
-      redirect: cisco.aci.aci_interface_policy_channel
+      redirect: cisco.aci.aci_interface_policy_port_channel
     aci_intf_policy_port_security:
-      redirect: cisco.aci.aci_interface_policy_security
+      redirect: cisco.aci.aci_interface_policy_port_security
     mso_schema_template_external_epg_contract:
       redirect: cisco.mso.mso_schema_template_external_epg_contract
     mso_schema_template_external_epg_subnet:
@@ -3001,7 +3001,7 @@ plugin_routing:
     sf_volume_manager:
       redirect: community.general.sf_volume_manager
     netapp_e_alerts:
-      redirect: netapp_eseries.santricity.netapp_e__alerts
+      redirect: netapp_eseries.santricity.netapp_e_alerts
     netapp_e_amg:
       redirect: netapp_eseries.santricity.netapp_e_amg
     netapp_e_amg_role:
@@ -5043,7 +5043,7 @@ plugin_routing:
     netbox_site:
       redirect: netbox.netbox.netbox_site
     aws_netapp_cvs_FileSystems:
-      redirect: netapp.aws.aws_netapp_cvs_FileSystems
+      redirect: netapp.aws.aws_netapp_cvs_filesystems
     aws_netapp_cvs_active_directory:
       redirect: netapp.aws.aws_netapp_cvs_active_directory
     aws_netapp_cvs_pool:
@@ -5627,7 +5627,9 @@ plugin_routing:
     asa_command:
       redirect: cisco.asa.asa_command
     intersight_facts:
-      redirect: cisco.intersight.intersight_facts
+      redirect: cisco.intersight.intersight_info
+    intersight_info:
+      redirect: cisco.intersight.intersight_info
     intersight_rest_api:
       redirect: cisco.intersight.intersight_rest_api
     ios_ospfv2:
@@ -6717,17 +6719,17 @@ plugin_routing:
     dellos10_config:
       redirect: dellemc.os10.os10_config
     dellos9_facts:
-      redirect: dellemc.os9.dellos9_facts
+      redirect: dellemc.os9.os9_facts
     dellos9_command:
-      redirect: dellemc.os9.dellos9_command
+      redirect: dellemc.os9.os9_command
     dellos9_config:
-      redirect: dellemc.os9.dellos9_config
+      redirect: dellemc.os9.os9_config
     dellos6_facts:
-      redirect: dellemc.os6.dellos6_facts
+      redirect: dellemc.os6.os6_facts
     dellos6_config:
-      redirect: dellemc.os6.dellos6_config
+      redirect: dellemc.os6.os6_config
     dellos6_command:
-      redirect: dellemc.os6.dellos6_command
+      redirect: dellemc.os6.os6_command
     hcloud_location_facts:
       redirect: hetzner.hcloud.hcloud_location_facts
     hcloud_server_info:
@@ -7620,7 +7622,7 @@ plugin_routing:
     database:
       redirect: community.general.database
     digital_ocean:
-      redirect: community.general.digital_ocean
+      redirect: community.digitalocean.digital_ocean
     dimensiondata:
       redirect: community.general.dimensiondata
     docker:
@@ -7641,14 +7643,13 @@ plugin_routing:
       tombstone:
         removal_date: 2019-11-06
     firewalld:
-      redirect: community.general.firewalld
+      redirect: ansible.posix.firewalld
     gcdns:
       redirect: community.general.gcdns
     gce:
       redirect: community.general.gce
-# FIXME: can't find this file in google.cloud
-#    gcp:
-#      redirect: google.cloud.gcp
+    gcp:
+      redirect: community.general.gcp
     gcp_utils:
       redirect: google.cloud.gcp_utils
     gitlab:
@@ -7670,7 +7671,7 @@ plugin_routing:
     identity.keycloak.keycloak:
       redirect: community.general.identity.keycloak.keycloak
     infinibox:
-      redirect: community.general.infinibox
+      redirect: infinidat.infinibox.infinibox
     influxdb:
       redirect: community.general.influxdb
     ipa:
@@ -7698,7 +7699,7 @@ plugin_routing:
     memset:
       redirect: community.general.memset
     mysql:
-      redirect: community.general.mysql
+      redirect: community.mysql.mysql
     net_tools.netbox.netbox_utils:
       redirect: netbox.netbox.netbox_utils
     net_tools.nios:
@@ -7758,8 +7759,11 @@ plugin_routing:
     network.common.utils:
       redirect: ansible.netcommon.network.common.utils
     network.dellos10.dellos10:
-      redirect: dellemc_networking.os10.network.os10
-    # FIXME: no collection source found for dellos6/dellos9
+      redirect: dellemc.os10.network.os10
+    network.dellos9.dellos9:
+      redirect: dellemc.os9.network.os9
+    network.dellos6.dellos6:
+      redirect: dellemc.os6.network.os6
     network.edgeos.edgeos:
       redirect: community.network.network.edgeos.edgeos
     network.edgeswitch.edgeswitch:
@@ -8638,9 +8642,9 @@ plugin_routing:
     network.nxos.utils.utils:
       redirect: cisco.nxos.network.nxos.utils.utils
     network.onyx:
-      redirect: community.network.network.onyx
+      redirect: mellanox.onyx.network.onyx
     network.onyx.onyx:
-      redirect: community.network.network.onyx.onyx
+      redirect: mellanox.onyx.network.onyx.onyx
     network.ordnance:
       redirect: community.network.network.ordnance
     network.ordnance.ordnance:
@@ -8894,9 +8898,9 @@ plugin_routing:
     dellos10:
       redirect: dellemc.os10.os10
     dellos9:
-      redirect: dellemc.os9.dellos9
+      redirect: dellemc.os9.os9
     dellos6:
-      redirect: dellemc.os6.dellos6
+      redirect: dellemc.os6.os6
     vyos:
       redirect: vyos.vyos.vyos
   terminal:
@@ -8957,9 +8961,9 @@ plugin_routing:
     dellos10:
       redirect: dellemc.os10.os10
     dellos9:
-      redirect: dellemc.os9.dellos9
+      redirect: dellemc.os9.os9
     dellos6:
-      redirect: dellemc.os6.dellos6
+      redirect: dellemc.os6.os6
     vyos:
       redirect: vyos.vyos.vyos
   action:
@@ -9075,9 +9079,9 @@ plugin_routing:
     dellos10:
       redirect: dellemc.os10.os10
     dellos9:
-      redirect: dellemc.os9.dellos9
+      redirect: dellemc.os9.os9
     dellos6:
-      redirect: dellemc.os6.dellos6
+      redirect: dellemc.os6.os6
     vyos:
       redirect: vyos.vyos.vyos
   become:
@@ -9210,7 +9214,7 @@ plugin_routing:
     cnos:
       redirect: community.network.cnos
     digital_ocean:
-      redirect: community.general.digital_ocean
+      redirect: community.digitalocean.digital_ocean
     dimensiondata:
       redirect: community.general.dimensiondata
     dimensiondata_wait:
@@ -9380,7 +9384,7 @@ plugin_routing:
     meraki:
       redirect: cisco.meraki.meraki
     mso:
-      redirect: cisco.mso.mso
+      redirect: cisco.mso.modules
     nxos:
       redirect: cisco.nxos.nxos
     ucs:
@@ -9400,9 +9404,9 @@ plugin_routing:
     dellos10:
       redirect: dellemc.os10.os10
     dellos9:
-      redirect: dellemc.os9.dellos9
+      redirect: dellemc.os9.os9
     dellos6:
-      redirect: dellemc.os6.dellos6
+      redirect: dellemc.os6.os6
     hcloud:
       redirect: hetzner.hcloud.hcloud
     skydive:
