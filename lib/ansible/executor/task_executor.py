@@ -707,13 +707,8 @@ class TaskExecutor:
         # also now add conneciton vars results when delegating
         if self._task.delegate_to:
             result["_ansible_delegated_vars"] = {'ansible_delegated_host': self._task.delegate_to}
-            for k in plugin_vars + RETURN_VARS:
-                if k in cvars and cvars[k] is not None:
-                    result["_ansible_delegated_vars"][k] = cvars[k]
-        else:
-            for k in plugin_vars + RETURN_VARS:
-                if k in cvars and cvars[k] is not None:
-                    result[k] = cvars[k]
+            for k in plugin_vars:
+                result["_ansible_delegated_vars"][k] = cvars.get(k)
 
         # and return
         display.debug("attempt loop complete, returning result")
@@ -982,8 +977,8 @@ class TaskExecutor:
         elif all((module_prefix in C.NETWORK_GROUP_MODULES, self._shared_loader_obj.action_loader.has_plugin(network_action, collection_list=collections))):
             handler_name = network_action
         else:
-            # FUTURE: once we're comfortable with collections impl, preface this action with ansible.builtin so it can't be hijacked
-            handler_name = 'normal'
+            # use ansible.legacy.normal to allow (historic) local action_plugins/ override without collections search
+            handler_name = 'ansible.legacy.normal'
             collections = None  # until then, we don't want the task's collection list to be consulted; use the builtin
 
         handler = self._shared_loader_obj.action_loader.get(
