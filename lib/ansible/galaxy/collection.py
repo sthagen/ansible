@@ -525,11 +525,17 @@ class CollectionRequirement:
                 else:
                     versions = api.get_collection_versions(namespace, name)
             except GalaxyError as err:
-                if err.http_code == 404:
-                    display.vvv("Collection '%s' is not available from server %s %s"
-                                % (collection, api.name, api.api_server))
-                    continue
-                raise
+                if err.http_code != 404:
+                    raise
+
+                versions = []
+
+            # Automation Hub doesn't return a 404 but an empty version list so we check that to align both AH and
+            # Galaxy when the collection is not available on that server.
+            if not versions:
+                display.vvv("Collection '%s' is not available from server %s %s" % (collection, api.name,
+                                                                                    api.api_server))
+                continue
 
             display.vvv("Collection '%s' obtained from server %s %s" % (collection, api.name, api.api_server))
             break
@@ -575,6 +581,7 @@ def build_collection(collection_path, output_path, force):
                                "the collection artifact." % to_native(collection_output))
 
     _build_collection_tar(b_collection_path, b_collection_output, collection_manifest, file_manifest)
+    return collection_output
 
 
 def download_collections(collections, output_path, apis, validate_certs, no_deps, allow_pre_release):
@@ -604,8 +611,19 @@ def download_collections(collections, output_path, apis, validate_certs, no_deps
                 requirements.append({'name': collection_filename, 'version': requirement.latest_version})
 
                 display.display("Downloading collection '%s' to '%s'" % (name, dest_path))
-                b_temp_download_path = requirement.download(b_temp_path)
-                shutil.move(b_temp_download_path, to_bytes(dest_path, errors='surrogate_or_strict'))
+
+                if requirement.api is None and requirement.b_path and os.path.isfile(requirement.b_path):
+                    shutil.copy(requirement.b_path, to_bytes(dest_path, errors='surrogate_or_strict'))
+                elif requirement.api is None and requirement.b_path:
+                    temp_path = to_text(b_temp_path, errors='surrogate_or_string')
+                    scm_build_path = os.path.join(temp_path, 'tmp_build-%s' % collection_filename)
+                    os.makedirs(to_bytes(scm_build_path, errors='surrogate_or_strict'), mode=0o0755)
+                    temp_download_path = build_collection(os.path.join(temp_path, name), scm_build_path, True)
+                    shutil.move(to_bytes(temp_download_path, errors='surrogate_or_strict'), to_bytes(dest_path, errors='surrogate_or_strict'))
+                else:
+                    b_temp_download_path = requirement.download(b_temp_path)
+                    shutil.move(b_temp_download_path, to_bytes(dest_path, errors='surrogate_or_strict'))
+
                 display.display("%s (%s) was downloaded successfully" % (name, requirement.latest_version))
 
             requirements_path = os.path.join(output_path, 'requirements.yml')
