@@ -44,8 +44,8 @@ def generate_base_docs(args):
         #
         modified_deps_file = os.path.join(tmp_dir, 'ansible.deps')
 
-        # The _acd_version doesn't matter
-        deps_file_contents = {'_acd_version': ansible_base__version__,
+        # The _ansible_version doesn't matter since we're only building docs for base
+        deps_file_contents = {'_ansible_version': ansible_base__version__,
                               '_ansible_base_version': ansible_base__version__}
 
         with open(modified_deps_file, 'w') as f:
@@ -53,7 +53,7 @@ def generate_base_docs(args):
 
         # Generate the plugin rst
         return antsibull_docs.run(['antsibull-docs', 'stable', '--deps-file', modified_deps_file,
-                                   '--ansible-base-cache', str(args.top_dir),
+                                   '--ansible-base-source', str(args.top_dir),
                                    '--dest-dir', args.output_dir])
 
         # If we make this more than just a driver for antsibull:
@@ -77,6 +77,10 @@ def generate_full_docs(args):
 
     with TemporaryDirectory() as tmp_dir:
         sh.git(['clone', 'https://github.com/ansible-community/ansible-build-data'], _cwd=tmp_dir)
+        # This is wrong.  Once ansible and ansible-base major.minor versions get out of sync this
+        # will stop working.  We probably need to walk all subdirectories in reverse version order
+        # looking for the latest ansible version which uses something compatible with
+        # ansible_base_major_ver.
         deps_files = glob.glob(os.path.join(tmp_dir, 'ansible-build-data',
                                             ansible_base_major_ver, '*.deps'))
         if not deps_files:
@@ -88,7 +92,7 @@ def generate_full_docs(args):
         for filename in deps_files:
             with open(filename, 'r') as f:
                 deps_data = yaml.safe_load(f.read())
-            new_version = Version(deps_data['_ansible_base_version'])
+            new_version = Version(deps_data['_ansible_version'])
             if new_version > latest_ver:
                 latest_ver = new_version
                 latest = filename
@@ -108,7 +112,7 @@ def generate_full_docs(args):
 
         # Generate the plugin rst
         return antsibull_docs.run(['antsibull-docs', 'stable', '--deps-file', modified_deps_file,
-                                   '--ansible-base-cache', str(args.top_dir),
+                                   '--ansible-base-source', str(args.top_dir),
                                    '--dest-dir', args.output_dir])
 
         # If we make this more than just a driver for antsibull:

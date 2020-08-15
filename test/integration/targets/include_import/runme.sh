@@ -5,7 +5,7 @@ set -eux
 export ANSIBLE_ROLES_PATH=./roles
 
 function gen_task_files() {
-    for i in $(seq -f '%03g' 1 39); do
+    for i in $(printf "%03d " {1..39}); do
         echo -e "- name: Hello Message\n  debug:\n    msg: Task file ${i}" > "tasks/hello/tasks-file-${i}.yml"
     done
 }
@@ -114,3 +114,5 @@ test "$(grep -c 'ok=3' test_allow_single_role_dup.out)" = 1
 
 # https://github.com/ansible/ansible/issues/66764
 ANSIBLE_HOST_PATTERN_MISMATCH=error ansible-playbook empty_group_warning/playbook.yml
+
+ansible-playbook test_include_loop.yml "$@"
