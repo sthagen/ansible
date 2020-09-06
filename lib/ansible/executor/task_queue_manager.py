@@ -21,7 +21,9 @@ __metaclass__ = type
 
 import os
 import tempfile
+import threading
 import time
+import multiprocessing.queues
 
 from ansible import constants as C
 from ansible import context
@@ -29,21 +31,53 @@ from ansible.errors import AnsibleError
 from ansible.executor.play_iterator import PlayIterator
 from ansible.executor.stats import AggregateStats
 from ansible.executor.task_result import TaskResult
-from ansible.module_utils.six import string_types
+from ansible.module_utils.six import PY3, string_types
 from ansible.module_utils._text import to_text, to_native
 from ansible.playbook.play_context import PlayContext
+from ansible.playbook.task import Task
 from ansible.plugins.loader import callback_loader, strategy_loader, module_loader
 from ansible.plugins.callback import CallbackBase
 from ansible.template import Templar
 from ansible.vars.hostvars import HostVars
 from ansible.vars.reserved import warn_if_reserved
 from ansible.utils.display import Display
+from ansible.utils.lock import lock_decorator
 from ansible.utils.multiprocessing import context as multiprocessing_context
 
 
 __all__ = ['TaskQueueManager']
 
 display = Display()
+
+
+class CallbackSend:
+    def __init__(self, method_name, *args, **kwargs):
+        self.method_name = method_name
+        self.args = args
+        self.kwargs = kwargs
+
+
+class FinalQueue(multiprocessing.queues.Queue):
+    def __init__(self, *args, **kwargs):
+        if PY3:
+            kwargs['ctx'] = multiprocessing_context
+        super(FinalQueue, self).__init__(*args, **kwargs)
+
+    def send_callback(self, method_name, *args, **kwargs):
+        self.put(
+            CallbackSend(method_name, *args, **kwargs),
+            block=False
+        )
+
+    def send_task_result(self, *args, **kwargs):
+        if isinstance(args[0], TaskResult):
+            tr = args[0]
+        else:
+            tr = TaskResult(*args, **kwargs)
+        self.put(
+            tr,
+            block=False
+        )
 
 
 class TaskQueueManager:
@@ -95,9 +129,11 @@ class TaskQueueManager:
         self._unreachable_hosts = dict()
 
         try:
-            self._final_q = multiprocessing_context.Queue()
+            self._final_q = FinalQueue()
         except OSError as e:
             raise AnsibleError("Unable to use multiprocessing, this is normally caused by lack of access to /dev/shm: %s" % to_native(e))
+
+        self._callback_lock = threading.Lock()
 
         # A temporary file (opened pre-fork) used by connection
         # plugins for inter-process locking.
@@ -253,14 +289,16 @@ class TaskQueueManager:
             self._start_at_done = True
 
         # and run the play using the strategy and cleanup on way out
-        play_return = strategy.run(iterator, play_context)
+        try:
+            play_return = strategy.run(iterator, play_context)
+        finally:
+            strategy.cleanup()
+            self._cleanup_processes()
 
         # now re-save the hosts that failed from the iterator to our internal list
         for host_name in iterator.get_failed_hosts():
             self._failed_hosts[host_name] = True
 
-        strategy.cleanup()
-        self._cleanup_processes()
         return play_return
 
     def cleanup(self):
@@ -316,12 +354,20 @@ class TaskQueueManager:
                 defunct = True
         return defunct
 
+    @lock_decorator(attr='_callback_lock')
     def send_callback(self, method_name, *args, **kwargs):
         for callback_plugin in [self._stdout_callback] + self._callback_plugins:
             # a plugin that set self.disabled to True will not be called
             # see osx_say.py example for such a plugin
             if getattr(callback_plugin, 'disabled', False):
                 continue
+
+            # a plugin can opt in to implicit tasks (such as meta). It does this
+            # by declaring self.wants_implicit_tasks = True.
+            wants_implicit_tasks = getattr(
+                callback_plugin,
+                'wants_implicit_tasks',
+                False)
 
             # try to find v2 method, fallback to v1 method, ignore callback if no method found
             methods = []
@@ -334,6 +380,12 @@ class TaskQueueManager:
 
             # send clean copies
             new_args = []
+
+            # If we end up being given an implicit task, we'll set this flag in
+            # the loop below. If the plugin doesn't care about those, then we
+            # check and continue to the next iteration of the outer loop.
+            is_implicit_task = False
+
             for arg in args:
                 # FIXME: add play/task cleaners
                 if isinstance(arg, TaskResult):
@@ -342,6 +394,12 @@ class TaskQueueManager:
                 # elif isinstance(arg, Task):
                 else:
                     new_args.append(arg)
+
+                if isinstance(arg, Task) and arg.implicit:
+                    is_implicit_task = True
+
+            if is_implicit_task and not wants_implicit_tasks:
+                continue
 
             for method in methods:
                 try:

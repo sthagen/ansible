@@ -5,7 +5,7 @@
 Ansible module architecture
 ***************************
 
-If you're working on Ansible's Core code, writing an Ansible module, or developing an action plugin, this deep dive helps you understand how Ansible's program flow executes. If you're just using Ansible Modules in playbooks, you can skip this section.
+If you are working on the ``ansible-base`` code, writing an Ansible module, or developing an action plugin, you may need to understand how Ansible's program flow executes. If you are just using Ansible Modules in playbooks, you can skip this section.
 
 .. contents::
    :local:
@@ -63,7 +63,7 @@ values as :term:`JSON`, and various file operations.
 .. note:: In Ansible, up to version 2.0.x, the official Python modules used the
     :ref:`module_replacer` framework.  For module authors, :ref:`Ansiballz` is
     largely a superset of :ref:`module_replacer` functionality, so you usually
-    do not need to know about one versus the other.
+    do not need to understand the differences between them.
 
 .. _flow_powershell_modules:
 

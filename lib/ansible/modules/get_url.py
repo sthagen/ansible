@@ -416,6 +416,14 @@ def extract_filename_from_headers(headers):
     return res
 
 
+def is_url(checksum):
+    """
+    Returns True if checksum value has supported URL scheme, else False."""
+    supported_schemes = ('http', 'https', 'ftp', 'file')
+
+    return urlsplit(checksum).scheme in supported_schemes
+
+
 # ==============================================================
 # main
 
@@ -487,23 +495,23 @@ def main():
         except ValueError:
             module.fail_json(msg="The checksum parameter has to be in format <algorithm>:<checksum>", **result)
 
-        if checksum.startswith('http://') or checksum.startswith('https://') or checksum.startswith('ftp://'):
+        if is_url(checksum):
             checksum_url = checksum
             # download checksum file to checksum_tmpsrc
             checksum_tmpsrc, checksum_info = url_get(module, checksum_url, dest, use_proxy, last_mod_time, force, timeout, headers, tmp_dest)
             with open(checksum_tmpsrc) as f:
                 lines = [line.rstrip('\n') for line in f]
             os.remove(checksum_tmpsrc)
-            checksum_map = {}
+            checksum_map = []
             for line in lines:
                 parts = line.split(None, 1)
                 if len(parts) == 2:
-                    checksum_map[parts[0]] = parts[1]
+                    checksum_map.append((parts[0], parts[1]))
             filename = url_filename(url)
 
             # Look through each line in the checksum file for a hash corresponding to
             # the filename in the url, returning the first hash that is found.
-            for cksum in (s for (s, f) in checksum_map.items() if f.strip('./') == filename):
+            for cksum in (s for (s, f) in checksum_map if f.strip('./') == filename):
                 checksum = cksum
                 break
             else:

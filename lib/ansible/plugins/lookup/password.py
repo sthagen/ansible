@@ -28,7 +28,7 @@ DOCUMENTATION = """
          required: True
       encrypt:
         description:
-           - Which hash scheme to encrypt the returning password, should be one hash scheme from C(passlib.hash).
+           - Which hash scheme to encrypt the returning password, should be one hash scheme from C(passlib.hash; md5_crypt, bcrypt, sha256_crypt, sha512_crypt)
            - If not provided, the password will be returned in plain text.
            - Note that the password is always stored as plain text, only the returning password is encrypted.
            - Encrypt also forces saving the salt value for idempotence.
@@ -107,7 +107,7 @@ from ansible.errors import AnsibleError, AnsibleAssertionError
 from ansible.module_utils._text import to_bytes, to_native, to_text
 from ansible.parsing.splitter import parse_kv
 from ansible.plugins.lookup import LookupBase
-from ansible.utils.encrypt import do_encrypt, random_password, random_salt
+from ansible.utils.encrypt import BaseHash, do_encrypt, random_password, random_salt
 from ansible.utils.path import makedirs_safe
 
 
@@ -325,20 +325,24 @@ class LookupModule(LookupBase):
             else:
                 plaintext_password, salt = _parse_content(content)
 
-            if params['encrypt'] and not salt:
+            encrypt = params['encrypt']
+            if encrypt and not salt:
                 changed = True
-                salt = random_salt()
+                try:
+                    salt = random_salt(BaseHash.algorithms[encrypt].salt_size)
+                except KeyError:
+                    salt = random_salt()
 
             if changed and b_path != to_bytes('/dev/null'):
-                content = _format_content(plaintext_password, salt, encrypt=params['encrypt'])
+                content = _format_content(plaintext_password, salt, encrypt=encrypt)
                 _write_password_file(b_path, content)
 
             if first_process:
                 # let other processes continue
                 _release_lock(lockfile)
 
-            if params['encrypt']:
-                password = do_encrypt(plaintext_password, params['encrypt'], salt=salt)
+            if encrypt:
+                password = do_encrypt(plaintext_password, encrypt, salt=salt)
                 ret.append(password)
             else:
                 ret.append(plaintext_password)

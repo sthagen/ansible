@@ -122,10 +122,13 @@ class TaskExecutor:
                     # create the overall result item
                     res = dict(results=item_results)
 
-                    # loop through the item results, and set the global changed/failed result flags based on any item.
+                    # loop through the item results and set the global changed/failed/skipped result flags based on any item.
+                    res['skipped'] = True
                     for item in item_results:
                         if 'changed' in item and item['changed'] and not res.get('changed'):
                             res['changed'] = True
+                        if res['skipped'] and ('skipped' not in item or ('skipped' in item and not item['skipped'])):
+                            res['skipped'] = False
                         if 'failed' in item and item['failed']:
                             item_ignore = item.pop('_ansible_ignore_errors')
                             if not res.get('failed'):
@@ -145,8 +148,10 @@ class TaskExecutor:
                                 res[array] = res[array] + item[array]
                                 del item[array]
 
-                    if not res.get('Failed', False):
+                    if not res.get('failed', False):
                         res['msg'] = 'All items completed'
+                    if res['skipped']:
+                        res['msg'] = 'All items skipped'
                 else:
                     res = dict(changed=False, skipped=True, skipped_reason='No items in the list', results=[])
             else:
@@ -377,14 +382,11 @@ class TaskExecutor:
                     'msg': 'Failed to template loop_control.label: %s' % to_text(e)
                 })
 
-            self._final_q.put(
-                TaskResult(
-                    self._host.name,
-                    self._task._uuid,
-                    res,
-                    task_fields=task_fields,
-                ),
-                block=False,
+            self._final_q.send_task_result(
+                self._host.name,
+                self._task._uuid,
+                res,
+                task_fields=task_fields,
             )
             results.append(res)
             del task_vars[loop_var]
@@ -600,7 +602,6 @@ class TaskExecutor:
             if self._task.async_val > 0:
                 if self._task.poll > 0 and not result.get('skipped') and not result.get('failed'):
                     result = self._poll_async_result(result=result, templar=templar, task_vars=vars_copy)
-                    # FIXME callback 'v2_runner_on_async_poll' here
 
                 # ensure no log is preserved
                 result["_ansible_no_log"] = self._play_context.no_log
@@ -672,7 +673,7 @@ class TaskExecutor:
                         result['_ansible_retry'] = True
                         result['retries'] = retries
                         display.debug('Retrying task, attempt %d of %d' % (attempt, retries))
-                        self._final_q.put(TaskResult(self._host.name, self._task._uuid, result, task_fields=self._task.dump_attrs()), block=False)
+                        self._final_q.send_task_result(self._host.name, self._task._uuid, result, task_fields=self._task.dump_attrs())
                         time.sleep(delay)
                         self._handler = self._get_action_handler(connection=self._connection, templar=templar)
         else:
@@ -778,6 +779,15 @@ class TaskExecutor:
                     raise
             else:
                 time_left -= self._task.poll
+                self._final_q.send_callback(
+                    'v2_runner_on_async_poll',
+                    TaskResult(
+                        self._host,
+                        async_task,
+                        async_result,
+                        task_fields=self._task.dump_attrs(),
+                    ),
+                )
 
         if int(async_result.get('finished', 0)) != 1:
             if async_result.get('_ansible_parsed'):

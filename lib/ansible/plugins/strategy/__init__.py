@@ -37,6 +37,7 @@ from ansible.errors import AnsibleError, AnsibleFileNotFound, AnsibleParserError
 from ansible.executor import action_write_locks
 from ansible.executor.process.worker import WorkerProcess
 from ansible.executor.task_result import TaskResult
+from ansible.executor.task_queue_manager import CallbackSend
 from ansible.module_utils.six.moves import queue as Queue
 from ansible.module_utils.six import iteritems, itervalues, string_types
 from ansible.module_utils._text import to_text
@@ -92,16 +93,19 @@ def results_thread_main(strategy):
             result = strategy._final_q.get()
             if isinstance(result, StrategySentinel):
                 break
+            elif isinstance(result, CallbackSend):
+                strategy._tqm.send_callback(result.method_name, *result.args, **result.kwargs)
+            elif isinstance(result, TaskResult):
+                with strategy._results_lock:
+                    # only handlers have the listen attr, so this must be a handler
+                    # we split up the results into two queues here to make sure
+                    # handler and regular result processing don't cross wires
+                    if 'listen' in result._task_fields:
+                        strategy._handler_results.append(result)
+                    else:
+                        strategy._results.append(result)
             else:
-                strategy._results_lock.acquire()
-                # only handlers have the listen attr, so this must be a handler
-                # we split up the results into two queues here to make sure
-                # handler and regular result processing don't cross wires
-                if 'listen' in result._task_fields:
-                    strategy._handler_results.append(result)
-                else:
-                    strategy._results.append(result)
-                strategy._results_lock.release()
+                display.warning('Received an invalid object (%s) in the result queue: %r' % (type(result), result))
         except (IOError, EOFError):
             break
         except Queue.Empty:
@@ -190,7 +194,6 @@ class StrategyBase:
         self._final_q = tqm._final_q
         self._step = context.CLIARGS.get('step', False)
         self._diff = context.CLIARGS.get('diff', False)
-        self.flush_cache = context.CLIARGS.get('flush_cache', False)
 
         # the task cache is a dictionary of tuples of (host.name, task._uuid)
         # used to find the original task object of in-flight tasks and to store
@@ -561,7 +564,12 @@ class StrategyBase:
                     if iterator.is_failed(original_host) and state and state.run_state == iterator.ITERATING_COMPLETE:
                         self._tqm._failed_hosts[original_host.name] = True
 
-                    if state and iterator.get_active_state(state).run_state == iterator.ITERATING_RESCUE:
+                    # Use of get_active_state() here helps detect proper state if, say, we are in a rescue
+                    # block from an included file (include_tasks). In a non-included rescue case, a rescue
+                    # that starts with a new 'block' will have an active state of ITERATING_TASKS, so we also
+                    # check the current state block tree to see if any blocks are rescuing.
+                    if state and (iterator.get_active_state(state).run_state == iterator.ITERATING_RESCUE or
+                                  iterator.is_any_block_rescuing(state)):
                         self._tqm._stats.increment('rescued', original_host.name)
                         self._variable_manager.set_nonpersistent_facts(
                             original_host.name,
@@ -1130,21 +1138,21 @@ class StrategyBase:
 
         skipped = False
         msg = ''
+        skip_reason = '%s conditional evaluated to False' % meta_action
+        self._tqm.send_callback('v2_playbook_on_task_start', task, is_conditional=False)
+
+        # These don't support "when" conditionals
+        if meta_action in ('noop', 'flush_handlers', 'refresh_inventory', 'reset_connection') and task.when:
+            self._cond_not_supported_warn(meta_action)
+
         if meta_action == 'noop':
-            # FIXME: issue a callback for the noop here?
-            if task.when:
-                self._cond_not_supported_warn(meta_action)
             msg = "noop"
         elif meta_action == 'flush_handlers':
-            if task.when:
-                self._cond_not_supported_warn(meta_action)
             self._flushed_hosts[target_host] = True
             self.run_handlers(iterator, play_context)
             self._flushed_hosts[target_host] = False
             msg = "ran handlers"
-        elif meta_action == 'refresh_inventory' or self.flush_cache:
-            if task.when:
-                self._cond_not_supported_warn(meta_action)
+        elif meta_action == 'refresh_inventory':
             self._inventory.refresh_inventory()
             self._set_hosts_cache(iterator._play)
             msg = "inventory successfully refreshed"
@@ -1156,6 +1164,7 @@ class StrategyBase:
                 msg = "facts cleared"
             else:
                 skipped = True
+                skip_reason += ', not clearing facts and fact cache for %s' % target_host.name
         elif meta_action == 'clear_host_errors':
             if _evaluate_conditional(target_host):
                 for host in self._inventory.get_hosts(iterator._play.hosts):
@@ -1165,12 +1174,16 @@ class StrategyBase:
                 msg = "cleared host errors"
             else:
                 skipped = True
+                skip_reason += ', not clearing host error state for %s' % target_host.name
         elif meta_action == 'end_play':
             if _evaluate_conditional(target_host):
                 for host in self._inventory.get_hosts(iterator._play.hosts):
                     if host.name not in self._tqm._unreachable_hosts:
                         iterator._host_states[host.name].run_state = iterator.ITERATING_COMPLETE
                 msg = "ending play"
+            else:
+                skipped = True
+                skip_reason += ', continuing play'
         elif meta_action == 'end_host':
             if _evaluate_conditional(target_host):
                 iterator._host_states[target_host.name].run_state = iterator.ITERATING_COMPLETE
@@ -1178,6 +1191,8 @@ class StrategyBase:
                 msg = "ending play for %s" % target_host.name
             else:
                 skipped = True
+                skip_reason += ", continuing execution for %s" % target_host.name
+                # TODO: Nix msg here? Left for historical reasons, but skip_reason exists now.
                 msg = "end_host conditional evaluated to false, continuing execution for %s" % target_host.name
         elif meta_action == 'reset_connection':
             all_vars = self._variable_manager.get_vars(play=iterator._play, host=target_host, task=task,
@@ -1202,9 +1217,6 @@ class StrategyBase:
             # a certain subset of variables exist.
             play_context.update_vars(all_vars)
 
-            if task.when:
-                self._cond_not_supported_warn(meta_action)
-
             if target_host in self._active_connections:
                 connection = Connection(self._active_connections[target_host])
                 del self._active_connections[target_host]
@@ -1227,12 +1239,16 @@ class StrategyBase:
         result = {'msg': msg}
         if skipped:
             result['skipped'] = True
+            result['skip_reason'] = skip_reason
         else:
             result['changed'] = False
 
         display.vv("META: %s" % msg)
 
-        return [TaskResult(target_host, task, result)]
+        res = TaskResult(target_host, task, result)
+        if skipped:
+            self._tqm.send_callback('v2_runner_on_skipped', res)
+        return [res]
 
     def get_hosts_left(self, iterator):
         ''' returns list of available hosts for this iterator by filtering out unreachables '''

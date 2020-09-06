@@ -9,7 +9,7 @@ Ansible 2.10 Porting Guide
 
 .. warning::
 
-         In preparation for the release of 2.10, many plugins and modules have migrated to Collections on  `Ansible Galaxy <https://galaxy.ansible.com>`_. For the current development status of Collections and FAQ see `Ansible Collections Community Guide <https://github.com/ansible-collections/overview/blob/master/README.rst>`_. We expect the 2.10 Porting Guide to change frequently up to the 2.10 release. Follow the conversations about collections on our various :ref:`communication` channels for the latest information on the status of the ``devel`` branch.
+         In preparation for the release of 2.10, many plugins and modules have migrated to Collections on  `Ansible Galaxy <https://galaxy.ansible.com>`_. For the current development status of Collections and FAQ see `Ansible Collections Community Guide <https://github.com/ansible-collections/overview/blob/main/README.rst>`_. We expect the 2.10 Porting Guide to change frequently up to the 2.10 release. Follow the conversations about collections on our various :ref:`communication` channels for the latest information on the status of the ``devel`` branch.
 
 This section discusses the behavioral changes between Ansible 2.9 and Ansible 2.10.
 
@@ -32,7 +32,7 @@ Playbook
 ========
 
 * Fixed a bug on boolean keywords that made random strings return 'False', now they should return an error if they are not a proper boolean
-  Example: `diff: yes-` was returning `False`.
+  Example: ``diff: yes-`` was returning ``False``.
 * A new fact, ``ansible_processor_nproc`` reflects the number of vcpus
   available to processes (falls back to the number of vcpus available to
   the scheduler).
@@ -53,79 +53,13 @@ Deprecated
 Modules
 =======
 
-Change to Default File Permissions
-----------------------------------
-
-To address CVE-2020-1736, the default permissions for certain files created by Ansible using ``atomic_move()`` were changed from ``0o666`` to ``0o600``. The default permissions value was only used for the temporary file before it was moved into its place or newly created files. If the file existed when the new temporary file was moved into place, Ansible would use the permissions of the existing file. If there was no existing file, Ansible would retain the default file permissions, combined with the system ``umask``, of the temporary file.
-
-Most modules that call ``atomic_move()`` also call ``set_fs_attributes_if_different()`` or ``set_mode_if_different()``, which will set the permissions of the file to what is specified in the task.
-
-A new warning will be displayed when all of the following conditions are true:
-
-    - The file at the final destination, not the temporary file, does not exist
-    - A module supports setting ``mode`` but it was not specified for the task
-    - The module calls ``atomic_move()`` but does not later call ``set_fs_attributes_if_different()`` or ``set_mode_if_different()`` with a ``mode`` specified
-
-The following modules call ``atomic_move()`` but do not call ``set_fs_attributes_if_different()``  or ``set_mode_if_different()`` and do not support setting ``mode``. This means for files they create, the default permissions have changed and there is no indication:
-
-    - M(known_hosts)
-    - M(service)
-
-
-Code Audit
-~~~~~~~~~~
-
-The code was audited for modules that use ``atomic_move()`` but **do not** later call ``set_fs_attributes_if_different()`` or ``set_mode_if_different()``. Modules that provide no means for specifying the ``mode`` will not display a warning message since there is no way for the playbook author to remove the warning. The behavior of each module with regards to the default permissions of temporary files and the permissions of newly created files is explained below.
-
-known_hosts
-^^^^^^^^^^^
-
-The M(known_hosts) module uses ``atomic_move()`` to operate on the ``known_hosts`` file specified by the ``path`` parameter in the module. It creates a temporary file using ``tempfile.NamedTemporaryFile()`` which creates a temporary file that is readable and writable only by the creating user ID.
-
-service
-^^^^^^^
-
-The M(service) module uses ``atomic_move()`` to operate on the default rc file, which is the first found of ``/etc/rc.conf``,  ``/etc/rc.conf.local``, and ``/usr/local/etc/rc.conf``. Since these files almost always exist on the target system, they will not be created and the existing permissions of the file will be used.
-
-**The following modules were included in Ansible <= 2.9. They have moved to collections but are documented here for completeness.**
-
-authorized_key
-^^^^^^^^^^^^^^
-
-The M(authorized_key) module uses ``atomic_move()`` to operate on the the ``authorized_key`` file. A temporary file is created with ``tempfile.mkstemp()`` before being moved into place. The temporary file is readable and writable only by the creating user ID. The M(authorized_key) module manages the permissions of the the ``.ssh`` direcotry and ``authorized_keys`` files if ``managed_dirs`` is set to ``True``, which is the default. The module sets the ``ssh`` directory owner and group to the ``uid`` and ``gid`` of the user specified in the ``user`` parameter and directory permissions to ``700``. The module sets the ``authorized_key`` file owner and group to the ``uid`` and ``gid`` of the user specified in the ``user`` parameter and file permissions to ``600``. These values cannot be controlled by module parameters.
-
-interfaces_file
-^^^^^^^^^^^^^^^
-The M(interfaces_file) module uses ``atomic_move()`` to operate on ``/etc/network/serivces`` or the ``dest`` specified by the module. A temporary file is created with ``tempfile.mkstemp()`` before being moved into place. The temporary file is readable and writable only by the creating user ID. If the file specified by ``path`` does not exist it will retain the permissions of the temporary file once moved into place.
-
-pam_limits
-^^^^^^^^^^
-
-The M(pam_limits) module uses ``atomic_move()`` to operate on ``/etc/security/limits.conf`` or the value of ``dest``. A temporary file is created using ``tempfile.NamedTemporaryFile()``, which is only readable and writable by the creating user ID. The temporary file will inherit the permissions of the file specified by ``dest``, or it will retain the permissions that only allow the creating user ID to read and write the file.
-
-pamd
-^^^^
-
-The M(pamd) module uses ``atomic_move()`` to operate on a file in ``/etc/pam.d``. The path and the file can be specified by setting the ``path`` and ``name`` parameters. A temporary file is created using ``tempfile.NamedTemporaryFile()``, which is only readable and writable by the creating user ID. The temporary file will inherit the permissions of the file located at ``[dest]/[name]``, or it will retain the permissions of the temporary file that only allow the creating user ID to read and write the file.
-
-redhat_subscription
-^^^^^^^^^^^^^^^^^^^
-
-The M(redhat_subscription) module uses ``atomic_move()`` to operate on ``/etc/yum/pluginconf.d/rhnplugin.conf`` and ``/etc/yum/pluginconf.d/subscription-manager.conf``. A temporary file is created with ``tempfile.mkstemp()`` before being moved into place. The temporary file is readable and writable only by the creating user ID and the temporary file will inherit the permissions of the existing file once it is moved in to place.
-
-selinux
-^^^^^^^
-
-The M(selinux) module uses ``atomic_move()`` to operate on ``/etc/selinux/config`` on the value specified by ``configfile``. The module will fail if ``configfile`` does not exist before any temporary data is written to disk. A temporary file is created with ``tempfile.mkstemp()`` before being moved into place. The temporary file is readable and writable only by the creating user ID. Since the file specified by ``configfile`` must exist, the temporary file will inherit the permissions of that file once it is moved in to place.
-
-sysctl
-^^^^^^
-
-The M(sysctl) module uses ``atomic_move()`` to operate on ``/etc/sysctl.conf`` or the value specified by ``sysctl_file``. The module will fail if ``sysctl_file`` does not exist before any temporary data is written to disk. A temporary file is created with ``tempfile.mkstemp()`` before being moved into place. The temporary file is readable and writable only by the creating user ID. Since the file specified by ``sysctl_file`` must exist, the temporary file will inherit the permissions of that file once it is moved in to place.
-
 .. warning::
 
 	Links on this page may not point to the most recent versions of modules. We will update them when we can.
+
+* Version 2.10.0 of ansible-base changed the default mode of file-based tasks to ``0o600 & ~umask`` when the user did not specify a ``mode`` parameter on file-based tasks. This was in response to a CVE report which we have reconsidered. As a result, the mode change has been reverted in 2.10.1, and mode will now default to ``0o666 & ~umask`` as in previous versions of Ansible.
+* If you changed any tasks to specify less restrictive permissions while using 2.10.0, those changes will be unnecessary (but will do no harm) in 2.10.1.
+* To avoid the issue raised in CVE-2020-1736, specify a ``mode`` parameter in all file-based tasks that accept it.
 
 
 Noteworthy module changes
@@ -159,11 +93,229 @@ Porting custom scripts
 
 No notable changes
 
+Porting Guide for v2.10.0b1
+===========================
 
-Networking
-==========
+Breaking Changes
+----------------
 
-No notable changes
+ansible.windows
+~~~~~~~~~~~~~~~
+
+- win_find - module has been refactored to better match the behaviour of the ``find`` module. Here is what has changed:
+    * When the directory specified by ``paths`` does not exist or is a file, it will no longer fail and will just warn the user
+    * Junction points are no longer reported as ``islnk``, use ``isjunction`` to properly report these files. This behaviour matches the win_stat module
+    * Directories no longer return a ``size``, this matches the ``stat`` and ``find`` behaviour and has been removed due to the difficulties in correctly reporting the size of a directory
+- win_user - Change idempotency checks for ``description`` to be case sensitive
+- win_user - Change idempotency checks for ``fullname`` to be case sensitive
+
+cisco.meraki
+~~~~~~~~~~~~
+
+- meraki_device - Changed tags from string to list
+- meraki_device - Removed serial_lldp_cdp parameter
+- meraki_device - Removed serial_uplink parameter
+- meraki_intrusion_prevention - Rename whitedlisted_rules to allowed_rules
+- meraki_mx_l3_firewall - Rule responses are now in a `rules` list
+- meraki_mx_l7_firewall - Rename blacklisted_countries to blocked_countries
+- meraki_mx_l7_firewall - Rename whitelisted_countries to allowed_countries
+- meraki_network - Local and remote status page settings cannot be set during network creation
+- meraki_network - `disableRemoteStatusPage` response is now `remote_status_page_enabled`
+- meraki_network - `disable_my_meraki_com` response is now `local_status_page_enabled`
+- meraki_network - `disable_my_meraki` has been deprecated
+- meraki_network - `enable_my_meraki` is now called `local_status_page_enabled`
+- meraki_network - `enable_remote_status_page` is now called `remote_status_page_enabled`
+- meraki_network - `enabled` response for VLAN status is now `vlans_enabled`
+- meraki_network - `tags` and `type` now return a list
+- meraki_snmp - peer_ips is now a list
+- meraki_switchport - `access_policy_number` is now an int and not a string
+- meraki_switchport - `tags` is now a list and not a string
+- meraki_webhook - Querying test status now uses state of query.
+
+community.windows
+~~~~~~~~~~~~~~~~~
+
+- win_pester - no longer runs all ``*.ps1`` file in the directory specified due to it executing potentially unknown scripts. It will follow the default behaviour of only running tests for files that are like ``*.tests.ps1`` which is built into Pester itself.
+
+community.zabbix
+~~~~~~~~~~~~~~~~
+
+- zabbix_javagateway - options ``javagateway_pidfile``, ``javagateway_listenip``, ``javagateway_listenport`` and ``javagateway_startpollers`` renamed to ``zabbix_javagateway_xyz`` (see `UPGRADE.md <https://github.com/ansible-collections/community.zabbix/blob/main/docs/UPGRADE.md>`_).
+
+Major Changes
+-------------
+
+cisco.meraki
+~~~~~~~~~~~~
+
+- Rewrite requests method for version 1.0 API and improved readability
+- meraki_mr_rf_profile - Configure wireless RF profiles.
+- meraki_mr_settings - Configure network settings for wireless.
+- meraki_ms_l3_interface - New module
+- meraki_ms_ospf - Configure OSPF.
+
+community.grafana
+~~~~~~~~~~~~~~~~~
+
+- Add changelog management for ansible 2.10 (#112)
+- grafana_datasource ; adding additional_json_data param
+
+community.libvirt
+~~~~~~~~~~~~~~~~~
+
+- added generic libvirt inventory plugin
+- removed libvirt_lxc inventory script
+
+Removed Collections
+-------------------
+
+- skydive.skydive (previously included version: 0.0.1-dev7)
+
+Removed Features
+----------------
+
+ansible.windows
+~~~~~~~~~~~~~~~
+
+- win_stat - removed the deprecated ``get_md55`` option and ``md5`` return value.
+
+community.windows
+~~~~~~~~~~~~~~~~~
+
+- win_psexec - removed the deprecated ``extra_opts`` option.
+
+Deprecated Features
+-------------------
+
+amazon.aws
+~~~~~~~~~~
+
+- All AWS Modules - ``aws_access_key``, ``aws_secret_key`` and ``security_token`` will be made mutually exclusive with ``profile`` after 2022-06-01.
+
+ansible.windows
+~~~~~~~~~~~~~~~
+
+- win_domain_controller - the ``log_path`` option has been deprecated and will be removed in a later release. This was undocumented and only related to debugging information for module development.
+- win_package - the ``ensure`` alias for the ``state`` option has been deprecated and will be removed in a later release. Please use ``state`` instead of ``ensure``.
+- win_package - the ``productid`` alias for the ``product_id`` option has been deprecated and will be removed in a later release. Please use ``product_id`` instead of ``productid``.
+- win_package - the ``username`` and ``password`` options has been deprecated and will be removed in a later release. The same functionality can be done by using ``become: yes`` and ``become_flags: logon_type=new_credentials logon_flags=netcredentials_only`` on the task.
+
+community.vmware
+~~~~~~~~~~~~~~~~
+
+- vmware_guest - deprecate specifying CDROM configuration as a dict, instead use a list.
+
+openstack.cloud
+~~~~~~~~~~~~~~~
+
+- foo - The bar option has been deprecated. Use the username option instead.
+- send_request - The quic option has been deprecated. Use the protocol option instead.
+
+Porting Guide for v2.10.0a9
+===========================
+
+Breaking Changes
+----------------
+
+amazon.aws
+~~~~~~~~~~
+
+- aws_s3 - can now delete versioned buckets even when they are not empty - set mode to delete to delete a versioned bucket and everything in it.
+
+Major Changes
+-------------
+
+amazon.aws
+~~~~~~~~~~
+
+- ec2 module_utils - The ``AWSRetry`` decorator no longer catches ``NotFound`` exceptions by default.  ``NotFound`` exceptions need to be explicitly added using ``catch_extra_error_codes``.  Some AWS modules may see an increase in transient failures due to AWS''s eventual consistency model.
+
+gluster.gluster
+~~~~~~~~~~~~~~~
+
+- geo_rep - Added the independent module of geo rep with other gluster modules (https://github.com/gluster/gluster-ansible-collection/pull/2).
+
+ovirt.ovirt
+~~~~~~~~~~~
+
+- ovirt_disk - Add backup (https://github.com/oVirt/ovirt-ansible-collection/pull/57).
+- ovirt_disk - Support direct upload/download (https://github.com/oVirt/ovirt-ansible-collection/pull/35).
+- ovirt_host - Add ssh_port (https://github.com/oVirt/ovirt-ansible-collection/pull/60).
+- ovirt_vm_os_info - Creation of module (https://github.com/oVirt/ovirt-ansible-collection/pull/26).
+
+purestorage.flasharray
+~~~~~~~~~~~~~~~~~~~~~~
+
+- purefa_console - manage Console Lock setting for the FlashArray
+- purefa_endpoint - manage VMware protocol-endpoints on the FlashArray
+- purefa_eula - sign, or resign, FlashArray EULA
+- purefa_inventory - get hardware inventory information from a FlashArray
+- purefa_network - manage the physical and virtual network settings on the FlashArray
+- purefa_pgsched - manage protection group snapshot and replication schedules on the FlashArray
+- purefa_pod - manage ActiveCluster pods in FlashArrays
+- purefa_pod_replica - manage ActiveDR pod replica links in FlashArrays
+- purefa_proxy - manage the phonehome HTTPS proxy setting for the FlashArray
+- purefa_smis - manage SMI-S settings on the FlashArray
+- purefa_subnet - manage network subnets on the FlashArray
+- purefa_timeout - manage the GUI idle timeout on the FlashArray
+- purefa_vlan - manage VLAN interfaces on the FlashArray
+- purefa_vnc - manage VNC for installed applications on the FlashArray
+- purefa_volume_tags - manage volume tags on the FlashArray
+
+purestorage.flashblade
+~~~~~~~~~~~~~~~~~~~~~~
+
+- purefb_alert - manage alert email settings on a FlashBlade
+- purefb_bladename - manage FlashBlade name
+- purefb_bucket_replica - manage bucket replica links on a FlashBlade
+- purefb_connect - manage connections between FlashBlades
+- purefb_dns - manage DNS settings on a FlashBlade
+- purefb_fs_replica - manage filesystem replica links on a FlashBlade
+- purefb_inventory - get information about the hardware inventory of a FlashBlade
+- purefb_ntp - manage the NTP settings for a FlashBlade
+- purefb_phonehome - manage the phone home settings for a FlashBlade
+- purefb_policy - manage the filesystem snapshot policies for a FlashBlade
+- purefb_proxy - manage the phone home HTTP proxy settings for a FlashBlade
+- purefb_remote_cred - manage the Object Store Remote Credentials on a FlashBlade
+- purefb_snmp_agent - modify the FlashBlade SNMP Agent
+- purefb_snmp_mgr - manage SNMP Managers on a FlashBlade
+- purefb_target - manage remote S3-capable targets for a FlashBlade
+- purefb_user - manage local ``pureuser`` account password on a FlashBlade
+
+Deprecated Features
+-------------------
+
+amazon.aws
+~~~~~~~~~~
+
+- cloudformation - The ``template_format`` option had no effect since Ansible 2.3 and will be removed after 2022-06-01
+- cloudformation - the ``template_format`` option has been deprecated and will be removed in a later release. It has been ignored by the module since Ansible 2.3.
+- data_pipeline - The ``version`` option had no effect and will be removed in after 2022-06-01
+- ec2 - in a later release, the ``group`` and ``group_id`` options will become mutually exclusive.  Currently ``group_id`` is ignored if you pass both.
+- ec2_ami - The ``no_device`` alias ``NoDevice`` has been deprecated  and will be removed after 2022-06-01
+- ec2_ami - The ``virtual_name`` alias ``VirtualName`` has been deprecated and will be removed after 2022-06-01
+- ec2_eip - The ``wait_timeout`` option had no effect and will be removed after 2022-06-01
+- ec2_key - The ``wait_timeout`` option had no effect and will be removed after 2022-06-01
+- ec2_key - The ``wait`` option had no effect and will be removed after 2022-06-01
+- ec2_key - the ``wait_timeout`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.5.
+- ec2_key - the ``wait`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.5.
+- ec2_lc - The ``associate_public_ip_address`` option had no effect and will be removed after 2022-06-01
+- ec2_tag - deprecate the ``list`` option in favor of ec2_tag_info
+- ec2_tag - support for ``list`` as a state has been deprecated and will be removed in a later release.  The ``ec2_tag_info`` can be used to fetch the tags on an EC2 resource.
+
+community.aws
+~~~~~~~~~~~~~
+
+- data_pipeline - the ``version`` option has been deprecated and will be removed in a later release. It has always been ignored by the module.
+- ec2_eip - the ``wait_timeout`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.3.
+- ec2_lc - the ``associate_public_ip_address`` option has been deprecated and will be removed after a later release. It has always been ignored by the module.
+- elb_network_lb - in a later release, the default behaviour for the ``state`` option will change from ``absent`` to ``present``.  To maintain the existing behavior explicitly set state to ``absent``.
+- iam_managed_policy - the ``fail_on_delete`` option has been deprecated and will be removed after a later release.  It has always been ignored by the module.
+- iam_policy - in a later release, the default value for the ``skip_duplicates`` option will change from ``true`` to ``false``.  To maintain the existing behavior explicitly set it to ``true``.
+- iam_policy - the ``policy_document`` option has been deprecated and will be removed after a later release. To maintain the existing behavior use the ``policy_json`` option and read the file with the ``lookup`` plugin.
+- iam_role - in a later release, the ``purge_policies`` option (also know as ``purge_policy``) default value will change from ``true`` to ``false``
+- s3_lifecycle - the ``requester_pays`` option has been deprecated and will be removed after a later release. It has always been ignored by the module.
+- s3_sync - the ``retries`` option has been deprecated and will be removed after 2022-06-01. It has always been ignored by the module.
 
 Porting Guide for v2.10.0a8
 ===========================
@@ -236,12 +388,25 @@ Porting Guide for v2.10.0a7
 Major Changes
 -------------
 
+ansible.netcommon
+~~~~~~~~~~~~~~~~~
+
+- Add libssh connection plugin and refactor network_cli (https://github.com/ansible-collections/ansible.netcommon/pull/30)
+
 community.kubernetes
 ~~~~~~~~~~~~~~~~~~~~
 
 - helm_plugin - new module to manage Helm plugins (https://github.com/ansible-collections/community.kubernetes/pull/154).
 - helm_plugin_info - new modules to gather information about Helm plugins (https://github.com/ansible-collections/community.kubernetes/pull/154).
 - k8s_exec - Return rc for the command executed (https://github.com/ansible-collections/community.kubernetes/pull/158).
+
+Removed Features
+----------------
+
+ansible.netcommon
+~~~~~~~~~~~~~~~~~
+
+- module_utils.network.common.utils.ComplexDict has been removed
 
 Porting Guide for v2.10.0a5
 ===========================
@@ -282,6 +447,43 @@ ansible.windows
 - win_domain_computer - Deprecated the undocumented ``log_path`` option. This option will be removed in a major release after ``2022-07-01``.
 - win_regedit - Deprecated using forward slashes as a path separator, use backslashes to avoid ambiguity between a forward slash in the key name or a forward slash as a path separator. This feature will be removed in a major release after ``2021-07-01``.
 
+Porting Guide for v2.10.0a3
+===========================
+
+Breaking Changes
+----------------
+
+netbox.netbox
+~~~~~~~~~~~~~
+
+- To pass in integers via Ansible Jinja filters for a key in ``data`` that
+  requires querying an endpoint is now done by making it a dictionary with
+  an ``id`` key. The previous behavior was to just pass in an integer and
+  it was converted when normalizing the data, but some people may have names
+  that are all integers and those were being converted erroneously so we made
+  the decision to change the method to convert to an integer for the NetBox
+  API.
+
+  ::
+
+    tasks:
+      - name: Create device within NetBox with only required information
+        netbox_device:
+          netbox_url: http://netbox-demo.org:32768
+          netbox_token: 0123456789abcdef0123456789abcdef01234567
+          data:
+            name: Test66
+            device_type:
+              id: "{{ some_jinja_variable }}"
+            device_role: Core Switch
+            site: Test Site
+            status: Staged
+          state: present
+- ``pynetbox`` changed to using ``requests.Session()`` to manage the HTTP session
+  which broke passing in ``ssl_verify`` when building the NetBox API client.
+  This PR makes ``pynetbox 5.0.4+`` the new required version of `pynetbox` for
+  the Ansible modules and lookup plugin. (https://github.com/netbox-community/ansible_modules/pull/269)
+
 Porting Guide for v2.10.0a2
 ===========================
 
@@ -304,6 +506,20 @@ community.network
 
 - routeros_facts - allow multiple addresses and neighbors per interface. This makes ``ansible_net_neighbors`` a list instead of a dict (https://github.com/ansible-collections/community.network/pull/6).
 
+theforeman.foreman
+~~~~~~~~~~~~~~~~~~
+
+- All modules were renamed to drop the ``foreman_`` and ``katello_`` prefixes.
+  Additionally to the prefix removal, the following modules were further ranamed:
+
+  * katello_upload to content_upload
+  * katello_sync to repository_sync
+  * katello_manifest to subscription_manifest
+  * foreman_search_facts to resource_info
+  * foreman_ptable to partition_table
+  * foreman_model to hardware_model
+  * foreman_environment to puppet_environment
+
 Major Changes
 -------------
 
@@ -324,7 +540,6 @@ community.general
 - docker_container - the ``network_mode`` option will be set by default to the name of the first network in ``networks`` if at least one network is given and ``networks_cli_compatible`` is ``true`` (will be default from community.general 2.0.0 on). Set to an explicit value to avoid deprecation warnings if you specify networks and set ``networks_cli_compatible`` to ``true``. The current default (not specifying it) is equivalent to the value ``default``.
 - docker_container - the module has a new option, ``container_default_behavior``, whose default value will change from ``compatibility`` to ``no_defaults``. Set to an explicit value to avoid deprecation warnings.
 - gitlab_user - no longer requires ``name``, ``email`` and ``password`` arguments when ``state=absent``.
-- zabbix_action - no longer requires ``esc_period`` and ``event_source`` arguments when ``state=absent``.
 
 community.kubernetes
 ~~~~~~~~~~~~~~~~~~~~
@@ -367,6 +582,23 @@ Ansible-base
 - hash_behaviour - Deprecate ``hash_behaviour`` for future removal.
 - script inventory plugin - The 'cache' option is deprecated and will be removed in 2.12. Its use has been removed from the plugin since it has never had any effect.
 
+community.aws
+~~~~~~~~~~~~~
+
+- cloudformation - The ``template_format`` option had no effect since Ansible 2.3 and will be removed after 2022-06-01
+- data_pipeline - The ``version`` option had no effect and will be removed after 2022-06-01
+- ec2_eip - The ``wait_timeout`` option had no effect and will be removed after 2022-06-01
+- ec2_key - The ``wait_timeout`` option had no effect and will be removed after 2022-06-01
+- ec2_key - The ``wait`` option had no effect and will be removed after 2022-06-01
+- ec2_lc - The ``associate_public_ip_address`` option had no effect and will be removed after 2022-06-01
+- elb_network_lb - The current default value of the ``state`` option has been deprecated and will change from absent to present after 2022-06-01
+- iam_managed_policy - The ``fail_on_delete`` option had no effect and will be removed after 2022-06-01
+- iam_policy - The ``policy_document`` will be removed after 2022-06-01.  To maintain the existing behavior use the ``policy_json`` option and read the file with the ``lookup`` plugin.
+- iam_policy - The default value of ``skip_duplicates`` will change after 2022-06-01 from ``true`` to ``false``.
+- iam_role - The default value of the purge_policies has been deprecated and will change from true to false after 2022-06-01
+- s3_lifecycle - The ``requester_pays`` option had no effect and will be removed after 2022-06-01
+- s3_sync - The ``retries`` option had no effect and will be removed after 2022-06-01
+
 community.crypto
 ~~~~~~~~~~~~~~~~
 
@@ -389,7 +621,6 @@ community.general
 - redfish_config - the ``bios_attribute_name`` and ``bios_attribute_value`` options will be removed. To maintain the existing behavior use the ``bios_attributes`` option instead.
 - redfish_config and redfish_command - the behavior to select the first System, Manager, or Chassis resource to modify when multiple are present will be removed. Use the new ``resource_id`` option to specify target resource to modify.
 - redfish_config, redfish_command - Behavior to modify the first System, Mananger, or Chassis resource when multiple are present is deprecated. Use the new ``resource_id`` option to specify target resource to modify.
-- zabbix_proxy - deprecates ``interface`` sub-options ``type`` and ``main`` when proxy type is set to passive via ``status=passive``. Make sure these suboptions are removed from your playbook as they were never supported by Zabbix in the first place.
 
 community.vmware
 ~~~~~~~~~~~~~~~~
@@ -402,28 +633,25 @@ Porting Guide for v2.10.0a1
 Breaking Changes
 ----------------
 
-- amazon.aws.aws_s3 - can now delete versioned buckets even when they are not empty - set mode to delete to delete a versioned bucket and everything in it.
-- ansible.windows.win_find - module has been refactored to better match the behaviour of the ``find`` module. Here is what has changed:
-    * When the directory specified by ``paths`` does not exist or is a file, it will no longer fail and will just warn the user
-    * Junction points are no longer reported as ``islnk``, use ``isjunction`` to properly report these files. This behaviour matches the ansible.windows.win_stat module
-    * Directories no longer return a ``size``, this matches the ``stat`` and ``find`` behaviour and has been removed due to the difficulties in correctly reporting the size of a directory
 - cisco.nxos.nxos_igmp_interface - no longer supports the deprecated ``oif_prefix`` and ``oif_source`` options. These have been superceeded by ``oif_ps``.
 - community.grafana.grafana_dashboard - the parameter ``message`` is renamed to ``commit_message`` since ``message`` is used by Ansible Core engine internally.
-- community.vmware.vmware_datastore_maintenancemode - now returns ``datastore_status`` instead of Ansible internal key ``results``.
-- community.vmware.vmware_guest_custom_attributes - does not require VM name which was a required parameter for releases prior to Ansible 2.10.
-- community.vmware.vmware_guest_find - the ``datacenter`` option has been removed.
-- community.vmware.vmware_host_kernel_manager - now returns ``host_kernel_status`` instead of Ansible internal key ``results``.
-- community.vmware.vmware_host_ntp - now returns ``host_ntp_status`` instead of Ansible internal key ``results``.
-- community.vmware.vmware_host_service_manager - now returns ``host_service_status`` instead of Ansible internal key ``results``.
-- community.vmware.vmware_tag - now returns ``tag_status`` instead of Ansible internal key ``results``.
-- community.vmware.vmware_vmkernel - the options ``ip_address`` and ``subnet_mask`` have been removed; use the suboptions ``ip_address`` and ``subnet_mask`` of the ``network`` option instead.
-- community.windows.win_pester - no longer runs all ``*.ps1`` file in the directory specified due to it executing potentially unknown scripts. It will follow the default behaviour of only running tests for files that are like ``*.tests.ps1`` which is built into Pester itself.
 - purestorage.flashblade.purefb_fs - no longer supports the deprecated ``nfs`` option. This has been superceeded by ``nfsv3``.
+
+netbox.netbox
+~~~~~~~~~~~~~
+
+- Change ``ip-addresses`` key in netbox inventory plugin to ``ip_addresses`` (https://github.com/netbox-community/ansible_modules/issues/139)
+- Changed ``group`` to ``tenant_group`` in ``netbox_tenant.py`` (https://github.com/netbox-community/ansible_modules/issues/9)
+- Changed ``role`` to ``prefix_role`` in ``netbox_prefix.py`` (https://github.com/netbox-community/ansible_modules/issues/9)
+- Module failures when required fields arent provided (https://github.com/netbox-community/ansible_modules/issues/24)
+- Renamed ``netbox_interface`` to ``netbox_device_interface`` (https://github.com/netbox-community/ansible_modules/issues/9)
+- This version has a few breaking changes due to new namespace and collection name. I felt it necessary to change the name of the lookup plugin and inventory plugin just not to have a non descriptive namespace call to use them. Below is an example:
+  ``netbox.netbox.netbox`` would be used for both inventory plugin and lookup plugin, but in different contexts so no collision will arise, but confusion will.
+  I renamed the lookup plugin to ``nb_lookup`` so it will be used with the FQCN ``netbox.netbox.nb_lookup``.
+  The inventory plugin will now be called within an inventory file by ``netbox.netbox.nb_inventory``
 
 Major Changes
 -------------
-
-- amazon.aws.ec2 module_utils: The ``AWSRetry`` decorator no longer catches ``NotFound`` exceptions by default.  ``NotFound`` exceptions need to be explicitly added using ``catch_extra_error_codes``.  Some AWS modules may see an increase in transient failures due to AWS's eventual consistency model.
 
 community.kubernetes
 ~~~~~~~~~~~~~~~~~~~~
@@ -444,34 +672,12 @@ community.kubernetes
 - kubectl - Connection plugin migrated from Ansible 2.9 to Kubernetes collection.
 - openshift - Inventory source migrated from Ansible 2.9 to Kubernetes collection.
 
-Removed Features
-----------------
-
-- ansible.windows.win_stat - removed the deprecated ``get_md55`` option and ``md5`` return value.
-- community.windows.win_psexec - removed the deprecated ``extra_opts`` option.
-
 Deprecated Features
 -------------------
 
-- The community.vmware.vmware_dns_config module has been deprecated and will be removed in a later release; use community.vmware.vmware_host_dns instead.
 - The vyos.vyos.vyos_static_route module has been deprecated and will be removed in a later release; use vyos.vyos.vyos_static_routes instead.
-- amazon.aws.cloudformation - the ``template_format`` option has been deprecated and will be removed in a later release. It has been ignored by the module since Ansible 2.3.
-- amazon.aws.ec2 - in a later release, the ``group`` and ``group_id`` options will become mutually exclusive.  Currently ``group_id`` is ignored if you pass both.
-- amazon.aws.ec2_key - the ``wait_timeout`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.5.
-- amazon.aws.ec2_key - the ``wait`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.5.
-- amazon.aws.ec2_tag - support for ``list`` as a state has been deprecated and will be removed in a later release.  The ``ec2_tag_info`` can be used to fetch the tags on an EC2 resource.
-- ansible.windows.win_domain_controller - the ``log_path`` option has been deprecated and will be removed in a later release. This was undocumented and only related to debugging information for module development.
-- ansible.windows.win_package - the ``ensure`` alias for the ``state`` option has been deprecated and will be removed in a later release. Please use ``state`` instead of ``ensure``.
-- ansible.windows.win_package - the ``productid`` alias for the ``product_id`` option has been deprecated and will be removed in a later release. Please use ``product_id`` instead of ``productid``.
-- ansible.windows.win_package - the ``username`` and ``password`` options has been deprecated and will be removed in a later release. The same functionality can be done by using ``become: yes`` and ``become_flags: logon_type=new_credentials logon_flags=netcredentials_only`` on the task.
-- community.aws.data_pipeline - the ``version`` option has been deprecated and will be removed in a later release. It has always been ignored by the module.
-- community.aws.ec2_eip - the ``wait_timeout`` option has been deprecated and will be removed in a later release. It has had no effect since Ansible 2.3.
-- community.aws.ec2_lc - the ``associate_public_ip_address`` option has been deprecated and will be removed in a later release. It has always been ignored by the module.
-- community.aws.elb_network_lb - in a later release, the default behaviour for the ``state`` option will change from ``absent`` to ``present``.  To maintain the existing behavior explicitly set state to ``absent``.
-- community.aws.iam_managed_policy - the ``fail_on_delete`` option has been deprecated and will be removed in a later release.  It has always been ignored by the module.
-- community.aws.iam_policy - in a later release, the default value for the ``skip_duplicates`` option will change from ``true`` to ``false``.  To maintain the existing behavior explicitly set it to ``true``.
-- community.aws.iam_policy - the ``policy_document`` option has been deprecated and will be removed in a later release. To maintain the existing behavior use the ``policy_json`` option and read the file with the ``lookup`` plugin.
-- community.aws.iam_role - in a later release, the ``purge_policies`` option (also know as ``purge_policy``) default value will change from ``true`` to ``false``
-- community.aws.s3_lifecycle - the ``requester_pays`` option has been deprecated and will be removed in a later release. It has always been ignored by the module.
-- community.aws.s3_sync - the ``retries`` option has been deprecated and will be removed in a later release. It has always been ignored by the module.
-- community.vmware.vmware_tag_info - in a later release, the module will not return ``tag_facts`` since it does not return multiple tags with the same name and different category id. To maintain the existing behavior use ``tag_info`` which is a list of tag metadata.
+
+community.zabbix
+~~~~~~~~~~~~~~~~
+
+- zabbix_proxy (module) - deprecates ``interface`` sub-options ``type`` and ``main`` when proxy type is set to passive via ``status=passive``. Make sure these suboptions are removed from your playbook as they were never supported by Zabbix in the first place.
