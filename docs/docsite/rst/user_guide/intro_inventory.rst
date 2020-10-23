@@ -72,9 +72,9 @@ Hosts in multiple groups
 
 You can (and probably will) put each host in more than one group. For example a production webserver in a datacenter in Atlanta might be included in groups called [prod] and [atlanta] and [webservers]. You can create groups that track:
 
-* What - An application, stack or microservice. (For example, database servers, web servers, and so on).
-* Where - A datacenter or region, to talk to local DNS, storage, and so on. (For example, east, west).
-* When - The development stage, to avoid testing on production resources. (For example, prod, test).
+* What - An application, stack or microservice (for example, database servers, web servers, and so on).
+* Where - A datacenter or region, to talk to local DNS, storage, and so on (for example, east, west).
+* When - The development stage, to avoid testing on production resources (for example, prod, test).
 
 Extending the previous YAML inventory to include what, when, and where would look like:
 
@@ -169,7 +169,7 @@ In YAML:
       webservers:
         hosts:
           www[01:50].example.com:
-          
+
 You can specify a stride (increments between sequence numbers) when defining a numeric range of hosts:
 
 In INI:
@@ -200,7 +200,7 @@ For numeric patterns, leading zeros can be included or removed, as desired. Rang
 Adding variables to inventory
 =============================
 
-You can store variable values that relate to a specific host or group in inventory. To start with, you may add variables directly to the hosts and groups in your main inventory file. As you add more and more managed nodes to your Ansible inventory, however, you will likely want to store variables in separate host and group variable files.
+You can store variable values that relate to a specific host or group in inventory. To start with, you may add variables directly to the hosts and groups in your main inventory file. As you add more and more managed nodes to your Ansible inventory, however, you will likely want to store variables in separate host and group variable files. See :ref:`define_variables_in_inventory` for details.
 
 .. _host_variables:
 
@@ -220,12 +220,13 @@ In YAML:
 .. code-block:: yaml
 
     atlanta:
-      host1:
-        http_port: 80
-        maxRequestsPerChild: 808
-      host2:
-        http_port: 303
-        maxRequestsPerChild: 909
+      hosts:    
+        host1:
+          http_port: 80
+          maxRequestsPerChild: 808
+        host2:
+          http_port: 303
+          maxRequestsPerChild: 909
 
 Unique values like non-standard SSH ports work well as host variables. You can add them to your Ansible inventory by adding the port number after the hostname with a colon:
 
@@ -446,9 +447,11 @@ You can change this behavior by setting the group variable ``ansible_group_prior
 .. code-block:: yaml
 
     a_group:
+      vars:
         testvar: a
         ansible_group_priority: 10
     b_group:
+      vars:
         testvar: b
 
 In this example, if both groups have the same priority, the result would normally have been ``testvar == b``, but since we are giving the ``a_group`` a higher priority the result will be ``testvar == a``.
@@ -651,23 +654,23 @@ Here is an example of how to instantly deploy to created containers:
 
 .. code-block:: yaml
 
-   - name: create jenkins container
-     docker_container:
+   - name: Create a jenkins container
+     community.general.docker_container:
        docker_host: myserver.net:4243
        name: my_jenkins
        image: jenkins
 
-   - name: add container to inventory
-     add_host:
+   - name: Add the container to inventory
+     ansible.builtin.add_host:
        name: my_jenkins
        ansible_connection: docker
        ansible_docker_extra_args: "--tlsverify --tlscacert=/path/to/ca.pem --tlscert=/path/to/client-cert.pem --tlskey=/path/to/client-key.pem -H=tcp://myserver.net:4243"
        ansible_user: jenkins
      changed_when: false
 
-   - name: create directory for ssh keys
+   - name: Create a directory for ssh keys
      delegate_to: my_jenkins
-     file:
+     ansible.builtin.file:
        path: "/var/jenkins_home/.ssh/jupiter"
        state: directory
 
@@ -727,7 +730,7 @@ To apply a playbook called :file:`site.yml`
 to all the app servers in the test environment, use the
 following command::
 
-  ansible-playbook -i inventory_test site.yml -l appservers
+  ansible-playbook -i inventory_test -l appservers site.yml
 
 .. _inventory_setup-per_function:
 
@@ -737,14 +740,14 @@ Example: Group by function
 In the previous section you already saw an example for using groups in
 order to cluster hosts that have the same function. This allows you,
 for instance, to define firewall rules inside a playbook or role
-without affecting database servers:
+affecting only database servers:
 
 .. code-block:: yaml
 
   - hosts: dbservers
     tasks:
-    - name: allow access from 10.0.0.1
-      iptables:
+    - name: Allow access from 10.0.0.1
+      ansible.builtin.iptables:
         chain: INPUT
         jump: ACCEPT
         source: 10.0.0.1

@@ -57,6 +57,7 @@ options:
               the user is removed from all groups except the primary group.
             - Before Ansible 2.3, the only input format allowed was a comma separated string.
         type: list
+        elements: str
     append:
         description:
             - If C(yes), add the user to the groups specified in C(groups).
@@ -69,8 +70,8 @@ options:
             - Optionally set the user's shell.
             - On macOS, before Ansible 2.5, the default shell for non-system users was C(/usr/bin/false).
               Since Ansible 2.5, the default shell for non-system users on macOS is C(/bin/bash).
-            - On other operating systems, the default shell is determined by the underlying tool being
-              used. See Notes for details.
+            - See notes for details on how other operating systems determine the default shell by
+              the underlying tool.
         type: str
     home:
         description:
@@ -412,6 +413,7 @@ import shutil
 import socket
 import subprocess
 import time
+import math
 
 from ansible.module_utils import distro
 from ansible.module_utils._text import to_bytes, to_native, to_text
@@ -580,6 +582,7 @@ class User(object):
         if self.local:
             command_name = 'luseradd'
             lgroupmod_cmd = self.module.get_bin_path('lgroupmod', True)
+            lchage_cmd = self.module.get_bin_path('lchage', True)
         else:
             command_name = 'useradd'
 
@@ -647,7 +650,7 @@ class User(object):
             cmd.append('-s')
             cmd.append(self.shell)
 
-        if self.expires is not None:
+        if self.expires is not None and not self.local:
             cmd.append('-e')
             if self.expires < time.gmtime(0):
                 cmd.append('')
@@ -672,12 +675,27 @@ class User(object):
             cmd.append('-r')
 
         cmd.append(self.name)
-        (rc, err, out) = self.execute_command(cmd)
-        if not self.local or rc != 0 or self.groups is None or len(self.groups) == 0:
-            return (rc, err, out)
+        (rc, out, err) = self.execute_command(cmd)
+        if not self.local or rc != 0:
+            return (rc, out, err)
+
+        if self.expires is not None:
+            if self.expires < time.gmtime(0):
+                lexpires = -1
+            else:
+                # Convert seconds since Epoch to days since Epoch
+                lexpires = int(math.floor(self.module.params['expires'])) // 86400
+            (rc, _out, _err) = self.execute_command([lchage_cmd, '-E', to_native(lexpires), self.name])
+            out += _out
+            err += _err
+            if rc != 0:
+                return (rc, out, err)
+
+        if self.groups is None or len(self.groups) == 0:
+            return (rc, out, err)
 
         for add_group in groups:
-            (rc, _err, _out) = self.execute_command([lgroupmod_cmd, '-M', self.name, add_group])
+            (rc, _out, _err) = self.execute_command([lgroupmod_cmd, '-M', self.name, add_group])
             out += _out
             err += _err
             if rc != 0:
@@ -718,6 +736,8 @@ class User(object):
             lgroupmod_cmd = self.module.get_bin_path('lgroupmod', True)
             lgroupmod_add = set()
             lgroupmod_del = set()
+            lchage_cmd = self.module.get_bin_path('lchage', True)
+            lexpires = None
         else:
             command_name = 'usermod'
 
@@ -800,16 +820,23 @@ class User(object):
 
             if self.expires < time.gmtime(0):
                 if current_expires >= 0:
-                    cmd.append('-e')
-                    cmd.append('')
+                    if self.local:
+                        lexpires = -1
+                    else:
+                        cmd.append('-e')
+                        cmd.append('')
             else:
                 # Convert days since Epoch to seconds since Epoch as struct_time
                 current_expire_date = time.gmtime(current_expires * 86400)
 
                 # Current expires is negative or we compare year, month, and day only
                 if current_expires < 0 or current_expire_date[:3] != self.expires[:3]:
-                    cmd.append('-e')
-                    cmd.append(time.strftime(self.DATE_FORMAT, self.expires))
+                    if self.local:
+                        # Convert seconds since Epoch to days since Epoch
+                        lexpires = int(math.floor(self.module.params['expires'])) // 86400
+                    else:
+                        cmd.append('-e')
+                        cmd.append(time.strftime(self.DATE_FORMAT, self.expires))
 
         # Lock if no password or unlocked, unlock only if locked
         if self.password_lock and not info[1].startswith('!'):
@@ -822,25 +849,35 @@ class User(object):
             cmd.append('-p')
             cmd.append(self.password)
 
-        (rc, err, out) = (None, '', '')
+        (rc, out, err) = (None, '', '')
 
         # skip if no usermod changes to be made
         if len(cmd) > 1:
             cmd.append(self.name)
-            (rc, err, out) = self.execute_command(cmd)
+            (rc, out, err) = self.execute_command(cmd)
 
-        if not self.local or not (rc is None or rc == 0) or (len(lgroupmod_add) == 0 and len(lgroupmod_del) == 0):
-            return (rc, err, out)
+        if not self.local or not (rc is None or rc == 0):
+            return (rc, out, err)
+
+        if lexpires is not None:
+            (rc, _out, _err) = self.execute_command([lchage_cmd, '-E', to_native(lexpires), self.name])
+            out += _out
+            err += _err
+            if rc != 0:
+                return (rc, out, err)
+
+        if len(lgroupmod_add) == 0 and len(lgroupmod_del) == 0:
+            return (rc, out, err)
 
         for add_group in lgroupmod_add:
-            (rc, _err, _out) = self.execute_command([lgroupmod_cmd, '-M', self.name, add_group])
+            (rc, _out, _err) = self.execute_command([lgroupmod_cmd, '-M', self.name, add_group])
             out += _out
             err += _err
             if rc != 0:
                 return (rc, out, err)
 
         for del_group in lgroupmod_del:
-            (rc, _err, _out) = self.execute_command([lgroupmod_cmd, '-m', self.name, del_group])
+            (rc, _out, _err) = self.execute_command([lgroupmod_cmd, '-m', self.name, del_group])
             out += _out
             err += _err
             if rc != 0:
@@ -2203,20 +2240,20 @@ class DarwinUser(User):
 
         if self.append is False:
             for remove in current - target:
-                (_rc, _err, _out) = self.__modify_group(remove, 'delete')
+                (_rc, _out, _err) = self.__modify_group(remove, 'delete')
                 rc += rc
                 out += _out
                 err += _err
                 changed = True
 
         for add in target - current:
-            (_rc, _err, _out) = self.__modify_group(add, 'add')
+            (_rc, _out, _err) = self.__modify_group(add, 'add')
             rc += _rc
             out += _out
             err += _err
             changed = True
 
-        return (rc, err, out, changed)
+        return (rc, out, err, changed)
 
     def _update_system_user(self):
         '''Hide or show user on login window according SELF.SYSTEM.
@@ -2287,7 +2324,7 @@ class DarwinUser(User):
     def create_user(self, command_name='dscl'):
         cmd = self._get_dscl()
         cmd += ['-create', '/Users/%s' % self.name]
-        (rc, err, out) = self.execute_command(cmd)
+        (rc, out, err) = self.execute_command(cmd)
         if rc != 0:
             self.module.fail_json(msg='Cannot create user "%s".' % self.name, err=err, out=out, rc=rc)
 
@@ -2314,16 +2351,16 @@ class DarwinUser(User):
 
                 cmd = self._get_dscl()
                 cmd += ['-create', '/Users/%s' % self.name, field[1], self.__dict__[field[0]]]
-                (rc, _err, _out) = self.execute_command(cmd)
+                (rc, _out, _err) = self.execute_command(cmd)
                 if rc != 0:
                     self.module.fail_json(msg='Cannot add property "%s" to user "%s".' % (field[0], self.name), err=err, out=out, rc=rc)
 
                 out += _out
                 err += _err
                 if rc != 0:
-                    return (rc, _err, _out)
+                    return (rc, _out, _err)
 
-        (rc, _err, _out) = self._change_user_password()
+        (rc, _out, _err) = self._change_user_password()
         out += _out
         err += _err
 
@@ -2334,7 +2371,7 @@ class DarwinUser(User):
             (rc, _out, _err, changed) = self._modify_group()
             out += _out
             err += _err
-        return (rc, err, out)
+        return (rc, out, err)
 
     def modify_user(self):
         changed = None
@@ -2350,7 +2387,7 @@ class DarwinUser(User):
                 if current is None or current != to_text(self.__dict__[field[0]]):
                     cmd = self._get_dscl()
                     cmd += ['-create', '/Users/%s' % self.name, field[1], self.__dict__[field[0]]]
-                    (rc, _err, _out) = self.execute_command(cmd)
+                    (rc, _out, _err) = self.execute_command(cmd)
                     if rc != 0:
                         self.module.fail_json(
                             msg='Cannot update property "%s" for user "%s".'
@@ -2359,7 +2396,7 @@ class DarwinUser(User):
                     out += _out
                     err += _err
         if self.update_password == 'always' and self.password is not None:
-            (rc, _err, _out) = self._change_user_password()
+            (rc, _out, _err) = self._change_user_password()
             out += _out
             err += _err
             changed = rc
@@ -2873,7 +2910,7 @@ def main():
             uid=dict(type='int'),
             non_unique=dict(type='bool', default=False),
             group=dict(type='str'),
-            groups=dict(type='list'),
+            groups=dict(type='list', elements='str'),
             comment=dict(type='str'),
             home=dict(type='path'),
             shell=dict(type='str'),

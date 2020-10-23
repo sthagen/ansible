@@ -59,6 +59,7 @@ options:
     description:
       - List the directory and file entries that you would like to exclude from the unarchive action.
     type: list
+    elements: str
     version_added: "2.1"
   keep_newer:
     description:
@@ -72,6 +73,7 @@ options:
       - Each space-separated command-line option should be a new element of the array. See examples.
       - Command-line options with multiple elements must use multiple lines in the array, one for each element.
     type: list
+    elements: str
     default: ""
     version_added: "2.1"
   remote_src:
@@ -330,8 +332,8 @@ class ZipArchive(object):
                 tpw = pwd.getpwnam(self.file_args['owner'])
             except KeyError:
                 try:
-                    tpw = pwd.getpwuid(self.file_args['owner'])
-                except (TypeError, KeyError):
+                    tpw = pwd.getpwuid(int(self.file_args['owner']))
+                except (TypeError, KeyError, ValueError):
                     tpw = pwd.getpwuid(run_uid)
             fut_owner = tpw.pw_name
             fut_uid = tpw.pw_uid
@@ -349,7 +351,9 @@ class ZipArchive(object):
                 tgr = grp.getgrnam(self.file_args['group'])
             except (ValueError, KeyError):
                 try:
-                    tgr = grp.getgrgid(self.file_args['group'])
+                    # no need to check isdigit() explicitly here, if we fail to
+                    # parse, the ValueError will be caught.
+                    tgr = grp.getgrgid(int(self.file_args['group']))
                 except (KeyError, ValueError, OverflowError):
                     tgr = grp.getgrgid(run_gid)
             fut_group = tgr.gr_name
@@ -822,8 +826,8 @@ def main():
             creates=dict(type='path'),
             list_files=dict(type='bool', default=False),
             keep_newer=dict(type='bool', default=False),
-            exclude=dict(type='list', default=[]),
-            extra_opts=dict(type='list', default=[]),
+            exclude=dict(type='list', elements='str', default=[]),
+            extra_opts=dict(type='list', elements='str', default=[]),
             validate_certs=dict(type='bool', default=True),
         ),
         add_file_common_args=True,

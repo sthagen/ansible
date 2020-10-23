@@ -264,7 +264,7 @@ You can view the original value of an encrypted variable using the debug module.
 
 .. code-block:: console
 
-   ansible localhost -m debug -a var="new_user_password" -e "@vars.yml" --vault-id dev@a_password_file
+   ansible localhost -m ansible.builtin.debug -a var="new_user_password" -e "@vars.yml" --vault-id dev@a_password_file
 
    localhost | SUCCESS => {
        "new_user_password": "hunter2"
@@ -309,7 +309,7 @@ To create a new encrypted data file called 'foo.yml' with the 'test' vault passw
 
    ansible-vault create --vault-id test@multi_password_file foo.yml
 
-The tool launches an editor (whatever editor you have defined with $EDITOR, default editor is vi). Add the content. When you close the the editor session, the file is saved as encrypted data. The file header reflects the vault ID used to create it:
+The tool launches an editor (whatever editor you have defined with $EDITOR, default editor is vi). Add the content. When you close the editor session, the file is saved as encrypted data. The file header reflects the vault ID used to create it:
 
 .. code-block:: text
 

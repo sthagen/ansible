@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = '''
-    callback: default
+    name: default
     type: stdout
     short_description: default Ansible screen output
     version_added: historical
@@ -106,6 +106,8 @@ class CallbackModule(CallbackBase):
         delegated_vars = result._result.get('_ansible_delegated_vars', None)
 
         if isinstance(result._task, TaskInclude):
+            if self._last_task_banner != result._task._uuid:
+                self._print_task_banner(result._task)
             return
         elif result._result.get('changed', False):
             if self._last_task_banner != result._task._uuid:

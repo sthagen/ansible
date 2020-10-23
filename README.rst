@@ -1,4 +1,4 @@
-|PyPI version| |Docs badge| |Chat badge| |Build Status| |Code Of Conduct| |Mailing Lists| |License|
+|PyPI version| |Docs badge| |Chat badge| |Build Status| |Code Of Conduct| |Mailing Lists| |License| |CII Best Practices|
 
 *******
 Ansible
@@ -28,8 +28,7 @@ Design Principles
 Use Ansible
 ===========
 
-You can install a released version of Ansible via ``pip``, a package manager, or
-our `release repository <https://releases.ansible.com/ansible/>`_. See our
+You can install a released version of Ansible with ``pip`` or a package manager. See our
 `installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_ for details on installing Ansible
 on a variety of platforms.
 
@@ -72,7 +71,7 @@ Branch Info
 *  The ``devel`` branch corresponds to the release actively under development.
 *  The ``stable-2.X`` branches correspond to stable releases.
 *  Create a branch based on ``devel`` and set up a `dev environment <https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#common-environment-setup>`_ if you want to open a PR.
-*  See the `Ansible release and maintenance <https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html>`_ page for information about active branches.
+*  See the `Ansible release and maintenance <https://docs.ansible.com/ansible/devel/reference_appendices/release_and_maintenance.html>`_ page for information about active branches.
 
 Roadmap
 =======
@@ -113,3 +112,6 @@ See `COPYING <COPYING>`_ to see the full text.
 .. |License| image:: https://img.shields.io/badge/license-GPL%20v3.0-brightgreen.svg
    :target: COPYING
    :alt: Repository License
+.. |CII Best Practices| image:: https://bestpractices.coreinfrastructure.org/projects/2372/badge
+   :target: https://bestpractices.coreinfrastructure.org/projects/2372
+   :alt: Ansible CII Best Practices certification

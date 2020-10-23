@@ -23,11 +23,11 @@ For those modules that implement `backup=no|yes` when manipulating files, a path
     .. code-block:: console
 
       "backup_file": "./foo.txt.32729.2020-07-30@06:24:19~"
-    
+
 
 changed
 ```````
-A boolean indicating if the task had to make changes.
+A boolean indicating if the task had to make changes to the target or delegated host.
 
     .. code-block:: console
 
@@ -241,8 +241,8 @@ This key contains a list of dictionaries that will be presented to the user. Key
 
 .. seealso::
 
-   :ref:`all_modules`
-       Learn about available modules
+   :ref:`list_of_collections`
+       Browse existing collections, modules, and plugins
    `GitHub modules directory <https://github.com/ansible/ansible/tree/devel/lib/ansible/modules>`_
        Browse source of core and extras modules
    `Mailing List <https://groups.google.com/group/ansible-devel>`_

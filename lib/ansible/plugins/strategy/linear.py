@@ -19,7 +19,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = '''
-    strategy: linear
+    name: linear
     short_description: Executes tasks in a linear fashion
     description:
         - Task execution is in lockstep per host batch as defined by C(serial) (default all).
@@ -265,7 +265,7 @@ class StrategyModule(StrategyBase):
                     task.action = templar.template(task.action)
 
                     try:
-                        action = action_loader.get(task.action, class_only=True)
+                        action = action_loader.get(task.action, class_only=True, collection_list=task.collections)
                     except KeyError:
                         # we don't care here, because the action may simply not have a
                         # corresponding action plugin

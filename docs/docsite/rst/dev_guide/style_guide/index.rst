@@ -133,6 +133,40 @@ We use:
       """"""""""""""""""""""""""""
 
 
+Syntax highlighting - Pygments
+------------------------------
+
+The Ansible documentation supports a range of `Pygments lexers <https://pygments.org/>`_
+for `syntax highlighting <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#code-examples>`_ to make our code examples look good. Each code-block must be correctly indented and surrounded by blank lines.
+
+The Ansible documentation allows the following values:
+
+* none (no highlighting)
+* ansible-output (a custom lexer for Ansible output)
+* bash
+* console
+* csharp
+* ini
+* json
+* powershell
+* python
+* rst
+* sh
+* shell
+* shell-session
+* text
+* yaml
+* yaml+jinja
+
+For example, you can highlight Python code using following syntax:
+
+.. code-block:: rst
+
+      .. code-block:: python
+
+         def my_beautiful_python_code():
+            pass
+
 Internal navigation
 -------------------
 
@@ -204,7 +238,7 @@ Modules require different suffixes from other plugins:
 Adding local TOCs
 ^^^^^^^^^^^^^^^^^
 
-The page you're reading includes a `local TOC <http://docutils.sourceforge.net/docs/ref/rst/directives.html#table-of-contents>`_.
+The page you're reading includes a `local TOC <https://docutils.sourceforge.io/docs/ref/rst/directives.html#table-of-contents>`_.
 If you include a local TOC:
 
 * place it below, not above, the main heading and (optionally) introductory text

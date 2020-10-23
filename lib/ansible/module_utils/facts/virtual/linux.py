@@ -61,6 +61,12 @@ class LinuxVirtual(Virtual):
                         virtual_facts['virtualization_type'] = 'lxc'
                         virtual_facts['virtualization_role'] = 'guest'
                         found_virt = True
+                if re.search('/system.slice/containerd.service', line):
+                    guest_tech.add('containerd')
+                    if not found_virt:
+                        virtual_facts['virtualization_type'] = 'containerd'
+                        virtual_facts['virtualization_role'] = 'guest'
+                        found_virt = True
 
         # lxc does not always appear in cgroups anymore but sets 'container=lxc' environment var, requires root privs
         if os.path.exists('/proc/1/environ'):
@@ -103,6 +109,10 @@ class LinuxVirtual(Virtual):
                 virtual_facts['virtualization_type'] = systemd_container
                 virtual_facts['virtualization_role'] = 'guest'
                 found_virt = True
+
+        # ensure 'container' guest_tech is appropriately set
+        if guest_tech.intersection(set(['docker', 'lxc', 'podman', 'openvz', 'containerd'])) or systemd_container:
+            guest_tech.add('container')
 
         if os.path.exists("/proc/xen"):
             is_xen_host = False
@@ -181,6 +191,12 @@ class LinuxVirtual(Virtual):
             guest_tech.add('kvm')
             if not found_virt:
                 virtual_facts['virtualization_type'] = 'kvm'
+                found_virt = True
+
+        if sys_vendor == 'KubeVirt':
+            guest_tech.add('KubeVirt')
+            if not found_virt:
+                virtual_facts['virtualization_type'] = 'KubeVirt'
                 found_virt = True
 
         # FIXME: This does also match hyperv
