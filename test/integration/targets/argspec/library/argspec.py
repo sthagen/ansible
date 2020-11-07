@@ -91,6 +91,41 @@ def main():
                     'off',
                 ],
             },
+            'choices': {
+                'type': 'str',
+                'choices': [
+                    'foo',
+                    'bar',
+                ],
+            },
+            'list_choices': {
+                'type': 'list',
+                'choices': [
+                    'foo',
+                    'bar',
+                    'baz',
+                ],
+            },
+            'primary': {
+                'type': 'str',
+                'aliases': [
+                    'alias',
+                ],
+            },
+            'password': {
+                'type': 'str',
+                'no_log': True,
+            },
+            'not_a_password': {
+                'type': 'str',
+                'no_log': False,
+            },
+            'maybe_password': {
+                'type': 'str',
+            },
+            'int': {
+                'type': 'int',
+            },
         },
         required_if=(
             ('state', 'present', ('path', 'content'), True),

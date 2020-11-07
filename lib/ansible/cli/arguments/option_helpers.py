@@ -19,6 +19,8 @@ try:
 except ImportError:
     HAS_LIBYAML = False
 
+from jinja2 import __version__ as j2_version
+
 import ansible
 from ansible import constants as C
 from ansible.module_utils._text import to_native
@@ -172,6 +174,7 @@ def version(prog=None):
     result.append("  ansible collection location = %s" % ':'.join(C.COLLECTIONS_PATHS))
     result.append("  executable location = %s" % sys.argv[0])
     result.append("  python version = %s" % ''.join(sys.version.splitlines()))
+    result.append("  jinja version = %s" % j2_version)
     result.append("  libyaml = %s" % HAS_LIBYAML)
     return "\n".join(result)
 
@@ -341,6 +344,12 @@ def add_runtask_options(parser):
     """Add options for commands that run a task"""
     parser.add_argument('-e', '--extra-vars', dest="extra_vars", action="append",
                         help="set additional variables as key=value or YAML/JSON, if filename prepend with @", default=[])
+
+
+def add_tasknoplay_options(parser):
+    """Add options for commands that run a task w/o a defined play"""
+    parser.add_argument('--task-timeout', type=int, dest="task_timeout", action="store", default=C.TASK_TIMEOUT,
+                        help="set task timeout limit in seconds, must be positive integer.")
 
 
 def add_subset_options(parser):
