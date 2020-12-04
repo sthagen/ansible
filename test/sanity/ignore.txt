@@ -31,6 +31,7 @@ hacking/build_library/build_ansible/command_plugins/update_intersphinx.py compil
 hacking/build_library/build_ansible/commands.py compile-2.6!skip # release and docs process only, 3.6+ required
 hacking/build_library/build_ansible/commands.py compile-2.7!skip # release and docs process only, 3.6+ required
 hacking/build_library/build_ansible/commands.py compile-3.5!skip # release and docs process only, 3.6+ required
+lib/ansible/keyword_desc.yml no-unwanted-files
 lib/ansible/cli/console.py pylint:blacklisted-name
 lib/ansible/cli/scripts/ansible_cli_stub.py shebang
 lib/ansible/cli/scripts/ansible_connection_cli_stub.py shebang
@@ -89,7 +90,6 @@ lib/ansible/modules/command.py validate-modules:nonexistent-parameter-documented
 lib/ansible/modules/command.py validate-modules:undocumented-parameter
 lib/ansible/modules/copy.py pylint:blacklisted-name
 lib/ansible/modules/copy.py validate-modules:doc-default-does-not-match-spec
-lib/ansible/modules/copy.py validate-modules:doc-type-does-not-match-spec
 lib/ansible/modules/copy.py validate-modules:nonexistent-parameter-documented
 lib/ansible/modules/copy.py validate-modules:undocumented-parameter
 lib/ansible/modules/dnf.py validate-modules:doc-required-mismatch

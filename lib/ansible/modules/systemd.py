@@ -60,9 +60,11 @@ options:
         description:
             - run systemctl within a given service manager scope, either as the default system scope (system),
               the current user's scope (user), or the scope of all users (global).
-            - "For systemd to work with 'user', the executing user must have its own instance of dbus started (systemd requirement).
-              The user dbus process is normally started during normal login, but not during the run of Ansible tasks.
+            - "For systemd to work with 'user', the executing user must have its own instance of dbus started and accessible (systemd requirement)."
+            - "The user dbus process is normally started during normal login, but not during the run of Ansible tasks.
               Otherwise you will probably get a 'Failed to connect to bus: no such file or directory' error."
+            - The user must have access, normally given via setting the ``XDG_RUNTIME_DIR`` variable, see example below.
+
         type: str
         choices: [ system, user, global ]
         default: system
@@ -124,6 +126,14 @@ EXAMPLES = '''
 - name: Just force systemd to re-execute itself (2.8 and above)
   systemd:
     daemon_reexec: yes
+
+- name: run a user service when XDG_RUNTIME_DIR is not set on remote login.
+  systemd:
+    name: myservice
+    state: started
+    scope: user
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ myuid }}"
 '''
 
 RETURN = '''
@@ -405,7 +415,9 @@ def main():
         elif err and rc == 1 and 'Failed to parse bus message' in err:
             result['status'] = parse_systemctl_show(to_native(out).split('\n'))
 
-            (rc, out, err) = module.run_command("{systemctl} list-unit-files '{unit}*'".format(systemctl=systemctl, unit=unit))
+            unit, sep, suffix = unit.partition('@')
+            unit_search = '{unit}{sep}*'.format(unit=unit, sep=sep)
+            (rc, out, err) = module.run_command("{systemctl} list-unit-files '{unit_search}'".format(systemctl=systemctl, unit_search=unit_search))
             is_systemd = unit in out
 
             (rc, out, err) = module.run_command("{systemctl} is-active '{unit}'".format(systemctl=systemctl, unit=unit))

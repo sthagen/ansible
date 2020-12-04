@@ -243,7 +243,12 @@ COLLECTIONS_SCAN_SYS_PATH:
   - {key: collections_scan_sys_path, section: defaults}
 COLLECTIONS_PATHS:
   name: ordered list of root paths for loading installed Ansible collections content
-  description: Colon separated paths in which Ansible will search for collections content.
+  description: >
+    Colon separated paths in which Ansible will search for collections content.
+    Collections must be in nested *subdirectories*, not directly in these directories.
+    For example, if ``COLLECTIONS_PATHS`` includes ``~/.ansible/collections``,
+    and you want to add ``my.collection`` to that directory, it must be saved as
+    ``~/.ansible/collections/ansible_collections/my/collection``.
   default: ~/.ansible/collections:/usr/share/ansible/collections
   type: pathspec
   env:
@@ -585,6 +590,15 @@ CALLABLE_ACCEPT_LIST:
     section: defaults
     version_added: '2.11'
   type: list
+CONTROLLER_PYTHON_WARNING:
+  name: Running Older than Python 3.8 Warning
+  default: True
+  description: Toggle to control showing warnings related to running a Python version
+               older than Python 3.8 on the controller
+  env: [{name: ANSIBLE_CONTROLLER_PYTHON_WARNING}]
+  ini:
+  - {key: controller_python_warning, section: defaults}
+  type: boolean
 DEFAULT_CALLBACK_PLUGIN_PATH:
   name: Callback Plugins Path
   default: ~/.ansible/plugins/callback:/usr/share/ansible/plugins/callback
@@ -1495,6 +1509,19 @@ GALAXY_DISPLAY_PROGRESS:
   - {key: display_progress, section: galaxy}
   type: bool
   version_added: "2.10"
+GALAXY_CACHE_DIR:
+  default: ~/.ansible/galaxy_cache
+  description:
+  - The directory that stores cached responses from a Galaxy server.
+  - This is only used by the ``ansible-galaxy collection install`` and ``download`` commands.
+  - Cache files inside this dir will be ignored if they are world writable.
+  env:
+  - name: ANSIBLE_GALAXY_CACHE_DIR
+  ini:
+  - section: galaxy
+    key: cache_dir
+  type: path
+  version_added: '2.11'
 HOST_KEY_CHECKING:
   name: Check host keys
   default: True

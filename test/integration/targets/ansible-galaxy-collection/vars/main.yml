@@ -1,5 +1,9 @@
 galaxy_verbosity: "{{ '' if not ansible_verbosity else '-' ~ ('v' * ansible_verbosity) }}"
 
+pulp_repositories:
+  - published
+  - secondary
+
 publish_namespaces:
   - ansible_test
 
@@ -110,3 +114,8 @@ collection_list:
   - namespace: symlink
     name: symlink
     use_symlink: yes
+
+  # Caching update tests
+  - namespace: cache
+    name: cache
+    version: 1.0.0
