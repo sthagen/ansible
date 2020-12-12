@@ -1266,6 +1266,7 @@ Another example Jinja template::
     switchport trunk allowed vlan {{ parsed_vlans[0] }}
     {% for i in range (1, parsed_vlans | count) %}
     switchport trunk allowed vlan add {{ parsed_vlans[i] }}
+    {% endfor %}
 
 This allows for dynamic generation of VLAN lists on a Cisco IOS tagged interface. You can store an exhaustive raw list of the exact VLANs required for an interface and then compare that to the parsed IOS output that would actually be generated for the configuration.
 
@@ -1305,7 +1306,7 @@ An idempotent method to generate unique hashes per system is to use a salt that 
 
     {{ 'secretpassword' | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string) }}
 
-Hash types available depend on the master system running Ansible, 'hash' depends on hashlib, password_hash depends on passlib (https://passlib.readthedocs.io/en/stable/lib/passlib.hash.html).
+Hash types available depend on the control system running Ansible, 'hash' depends on hashlib, password_hash depends on passlib (https://passlib.readthedocs.io/en/stable/lib/passlib.hash.html).
 
 .. versionadded:: 2.7
 
