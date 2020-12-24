@@ -157,9 +157,11 @@ from ansible.module_utils.common.sys_info import (
 from ansible.module_utils.pycompat24 import get_exception, literal_eval
 from ansible.module_utils.common.parameters import (
     get_unsupported_parameters,
+    get_type_validator,
     handle_aliases,
     list_deprecations,
     list_no_log_values,
+    DEFAULT_TYPE_VALIDATORS,
     PASS_VARS,
     PASS_BOOLS,
 )
@@ -739,20 +741,9 @@ class AnsibleModule(object):
 
         self._set_defaults(pre=True)
 
-        self._CHECK_ARGUMENT_TYPES_DISPATCHER = {
-            'str': self._check_type_str,
-            'list': self._check_type_list,
-            'dict': self._check_type_dict,
-            'bool': self._check_type_bool,
-            'int': self._check_type_int,
-            'float': self._check_type_float,
-            'path': self._check_type_path,
-            'raw': self._check_type_raw,
-            'jsonarg': self._check_type_jsonarg,
-            'json': self._check_type_jsonarg,
-            'bytes': self._check_type_bytes,
-            'bits': self._check_type_bits,
-        }
+        # This is for backwards compatibility only.
+        self._CHECK_ARGUMENT_TYPES_DISPATCHER = DEFAULT_TYPE_VALIDATORS
+
         if not bypass_checks:
             self._check_required_arguments()
             self._check_argument_types()
@@ -1853,20 +1844,13 @@ class AnsibleModule(object):
                 self._options_context.pop()
 
     def _get_wanted_type(self, wanted, k):
-        if not callable(wanted):
-            if wanted is None:
-                # Mostly we want to default to str.
-                # For values set to None explicitly, return None instead as
-                # that allows a user to unset a parameter
-                wanted = 'str'
-            try:
-                type_checker = self._CHECK_ARGUMENT_TYPES_DISPATCHER[wanted]
-            except KeyError:
-                self.fail_json(msg="implementation error: unknown type %s requested for %s" % (wanted, k))
+        # Use the private method for 'str' type to handle the string conversion warning.
+        if wanted == 'str':
+            type_checker, wanted = self._check_type_str, 'str'
         else:
-            # set the type_checker to the callable, and reset wanted to the callable's name (or type if it doesn't have one, ala MagicMock)
-            type_checker = wanted
-            wanted = getattr(wanted, '__name__', to_native(type(wanted)))
+            type_checker, wanted = get_type_validator(wanted)
+        if type_checker is None:
+            self.fail_json(msg="implementation error: unknown type %s requested for %s" % (wanted, k))
 
         return type_checker, wanted
 
@@ -2385,8 +2369,7 @@ class AnsibleModule(object):
             if e.errno not in [errno.EPERM, errno.EXDEV, errno.EACCES, errno.ETXTBSY, errno.EBUSY]:
                 # only try workarounds for errno 18 (cross device), 1 (not permitted),  13 (permission denied)
                 # and 26 (text file busy) which happens on vagrant synced folders and other 'exotic' non posix file systems
-                self.fail_json(msg='Could not replace file: %s to %s: %s' % (src, dest, to_native(e)),
-                               exception=traceback.format_exc())
+                self.fail_json(msg='Could not replace file: %s to %s: %s' % (src, dest, to_native(e)), exception=traceback.format_exc())
             else:
                 # Use bytes here.  In the shippable CI, this fails with
                 # a UnicodeError with surrogateescape'd strings for an unknown
@@ -2396,14 +2379,13 @@ class AnsibleModule(object):
                 error_msg = None
                 tmp_dest_name = None
                 try:
-                    tmp_dest_fd, tmp_dest_name = tempfile.mkstemp(prefix=b'.ansible_tmp',
-                                                                  dir=b_dest_dir, suffix=b_suffix)
+                    tmp_dest_fd, tmp_dest_name = tempfile.mkstemp(prefix=b'.ansible_tmp', dir=b_dest_dir, suffix=b_suffix)
                 except (OSError, IOError) as e:
                     error_msg = 'The destination directory (%s) is not writable by the current user. Error was: %s' % (os.path.dirname(dest), to_native(e))
                 except TypeError:
                     # We expect that this is happening because python3.4.x and
-                    # below can't handle byte strings in mkstemp().  Traceback
-                    # would end in something like:
+                    # below can't handle byte strings in mkstemp().
+                    # Traceback would end in something like:
                     #     file = _os.path.join(dir, pre + name + suf)
                     # TypeError: can't concat bytes to str
                     error_msg = ('Failed creating tmp file for atomic move.  This usually happens when using Python3 less than Python3.5. '
@@ -2447,11 +2429,12 @@ class AnsibleModule(object):
                                     self._unsafe_writes(b_tmp_dest_name, b_dest)
                                 else:
                                     self.fail_json(msg='Unable to make %s into to %s, failed final rename from %s: %s' %
-                                                       (src, dest, b_tmp_dest_name, to_native(e)),
-                                                   exception=traceback.format_exc())
+                                                       (src, dest, b_tmp_dest_name, to_native(e)), exception=traceback.format_exc())
                         except (shutil.Error, OSError, IOError) as e:
-                            self.fail_json(msg='Failed to replace file: %s to %s: %s' % (src, dest, to_native(e)),
-                                           exception=traceback.format_exc())
+                            if unsafe_writes:
+                                self._unsafe_writes(b_src, b_dest)
+                            else:
+                                self.fail_json(msg='Failed to replace file: %s to %s: %s' % (src, dest, to_native(e)), exception=traceback.format_exc())
                     finally:
                         self.cleanup(b_tmp_dest_name)
 
